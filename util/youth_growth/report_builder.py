@@ -242,6 +242,137 @@ def build_recommended_actions(
     return out[:10]
 
 
+_TEACHER_FLAG_SCRIPT: dict[str, str] = {
+    "sdq_emotional_distress": "若观察到情绪波动：反馈宜具体、温和，避免在同伴面前扩大化评价。",
+    "sdq_attention_hyperactivity": "若注意力与坐不住线索明显：任务分段布置、板书步骤清晰、减少同时多重口头指令。",
+    "sdq_peer_relation_strain": "若同伴关系敏感：小组活动可做稳定配对，冲突先单独倾听再公开协调。",
+    "sdq_conduct_regulation_risk": "若冲动对抗增多：先明确课堂边界与可预期后果，再安排课后一对一复盘。",
+    "sdq_low_prosocial_behavior": "若合作与助人表现偏弱：可给承担感适中的小组角色，并及时点名具体进步。",
+    "elevated_stress": "若压力线索偏高：作业与提问可先降难度与频率，用「完成一小段」替代「一次到位」。",
+    "poor_sleep": "若涉及作息：可与家长协商作业弹性，强调连续睡眠窗口比熬夜补作业更重要。",
+    "social_distress": "若社交支持偏弱：课堂上减少随机点名施压，多给准备时间再回答。",
+    "low_mood_energy": "若低落无力线索偏多：表扬聚焦过程努力，任务目标先小后大，避免公开比较。",
+}
+
+
+def build_communication_script(
+    *,
+    scores: dict[str, Any],
+    profile: dict[str, Any],
+    crisis: bool,
+) -> dict[str, str]:
+    """家校沟通话术：随分层、维度、标签与画像变化，避免长期固定两句。"""
+    if crisis:
+        return {
+            "for_parents": (
+                "请先放下对成绩与对错的追问，用短句确认陪伴与安全，例如「我在这里」「我们先保证你安全」。"
+                "避免争辩与说教，尽快联系专业人员，并让孩子身边有信任的成年人陪同。"
+            ),
+            "for_teachers": (
+                "请避免在班级公开场合追问细节或施压；安排可信成人一对一陪伴，并转介学校心理老师、做好交接记录。"
+                "课堂任务暂缓高要求，以稳定与安全为最高优先。"
+            ),
+        }
+
+    tier = str(scores.get("risk_tier") or "medium")
+    wellbeing = scores.get("mental_wellbeing_score")
+    try:
+        wb = float(wellbeing)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        wb = 0.0
+
+    dims = {k: v for k, v in (scores.get("dimensions") or {}).items() if isinstance(v, int)}
+    top_labels = _top_concerns(dims)
+    flags = [f for f in (scores.get("flags") or []) if isinstance(f, str)]
+
+    elem_zh = str(profile.get("element_label_zh") or "").strip()
+    tag = str(profile.get("psychology_tag") or "").strip()
+    summary = str(profile.get("psychology_summary") or "").strip()
+    if len(summary) > 72:
+        summary = summary[:69] + "…"
+
+    ef = profile.get("emotion_and_friendship") or {}
+    emo_style = str(ef.get("style") or "").strip()
+
+    # —— 家长话术 ——
+    parent_bits: list[str] = []
+    if tier == "high":
+        parent_bits.append(
+            f"当前心理健康观察分约 {wb:.1f} 分（{_risk_label(tier)}），建议先稳住关系与安全，"
+            "少用指责式连环提问，把「发生了什么」放在「你为什么不」之前。"
+        )
+    elif tier == "medium":
+        parent_bits.append(
+            f"当前心理健康观察分约 {wb:.1f} 分（{_risk_label(tier)}），"
+            "可用「我听到……」开头复述感受，再邀请孩子一起想一个当天能完成的小办法。"
+        )
+    else:
+        parent_bits.append(
+            f"当前心理健康观察分约 {wb:.1f} 分（{_risk_label(tier)}），"
+            "适合在散步、吃饭等轻松场景做短对话，先肯定过程努力，再轻量谈改进。"
+        )
+
+    if top_labels:
+        joined = "、".join(top_labels[:2])
+        parent_bits.append(f"谈到近况时，可先围绕「{joined}」慢一点问，避免一次追很多议题。")
+
+    if emo_style:
+        parent_bits.append(
+            f"孩子在同伴与情绪上偏「{emo_style}」，可把目标从「立刻改正」调整为「先接住情绪，再谈下一步」。"
+        )
+
+    if elem_zh or tag:
+        tail = f"{elem_zh}{'：' if elem_zh and tag else ''}{tag}" if (elem_zh or tag) else ""
+        if summary:
+            parent_bits.append(f"画像参考（{tail}）——{summary}" if tail else summary)
+        elif tail:
+            parent_bits.append(f"画像参考：{tail}。")
+
+    parent_bits.append("可选用「我们一起试试」替代「你应该」，把改进拆成当天就能完成的一小步。")
+
+    if "sdq_emotional_distress" in flags or "low_mood_energy" in flags:
+        parent_bits.append("若孩子沉默或顶撞，先命名情绪再暂停十分钟，往往比当场讲道理更有效。")
+    elif "sdq_attention_hyperactivity" in flags or "poor_sleep" in flags:
+        parent_bits.append("若作息与分心突出，先把「固定起床 + 可见任务清单」立住，再谈成绩目标。")
+
+    for_parents = "".join(parent_bits)
+
+    # —— 老师话术 ——
+    teacher_bits: list[str] = []
+    if tier == "high":
+        teacher_bits.append(
+            "建议以非公开方式了解近况，避免当堂追问或排名刺激；与心理老师协同并保持简要家校沟通记录。"
+        )
+    elif tier == "medium":
+        teacher_bits.append(
+            "课堂反馈可先降频、降难度，用可执行的小目标建立掌控感，再逐步提高要求。"
+        )
+    else:
+        teacher_bits.append(
+            "可在小组合作中给承担感适中的角色，反馈多用过程性语言，点名具体进步点。"
+        )
+
+    n_tf = 0
+    for flag in _prioritize_flags(flags):
+        line = _TEACHER_FLAG_SCRIPT.get(flag)
+        if line:
+            teacher_bits.append(line)
+            n_tf += 1
+        if n_tf >= 2:
+            break
+
+    if not n_tf and top_labels:
+        teacher_bits.append(
+            f"与家长沟通时可对齐优先关注：{'、'.join(top_labels[:2])}，约定一致的支持措辞与节奏。"
+        )
+
+    teacher_bits.append("评价与提问尽量避免公开比较，先给准备时间再点名，减少意外施压。")
+
+    for_teachers = "".join(teacher_bits)
+
+    return {"for_parents": for_parents, "for_teachers": for_teachers}
+
+
 def _timeline_comment(year_item: dict[str, Any]) -> str:
     focus = int(year_item.get("learning_focus", 3))
     wellbeing = int(year_item.get("wellbeing_hint", 3))
@@ -385,8 +516,5 @@ def build_detailed_report(
         "dimension_analysis": dimension_analysis,
         "growth_timeline": timeline,
         "action_plan": action_plan,
-        "communication_script": {
-            "for_parents": "建议使用“我们一起试试”的表述，减少“你应该”式指令，先稳定关系再谈改进。",
-            "for_teachers": "优先给可执行的小目标和过程反馈，降低公开比较，强化阶段性进步体验。",
-        },
+        "communication_script": build_communication_script(scores=scores, profile=profile, crisis=crisis),
     }

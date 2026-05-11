@@ -1,7 +1,7 @@
 """Tests for report_builder helpers."""
 from __future__ import annotations
 
-from util.youth_growth.report_builder import build_recommended_actions
+from util.youth_growth.report_builder import build_communication_script, build_recommended_actions
 from util.youth_growth.scoring import compute_scores
 
 
@@ -78,3 +78,58 @@ def test_build_recommended_actions_different_scores_change_opening():
         scores=high, profile=empty_profile, forecast_summary=fc, questionnaire=None
     )
     assert a_low[0] != a_high[0]
+
+
+def _sample_profile() -> dict:
+    return {
+        "element_label_zh": "水系（壬/癸）",
+        "psychology_tag": "高内耗型智者 / 隐秘的胜负欲",
+        "psychology_summary": "思维敏捷、内省深；压力下易思虑过度，需安全感与节奏管理。",
+        "emotion_and_friendship": {"style": "同理强、压力下易退缩"},
+    }
+
+
+def test_communication_script_varies_by_tier_and_profile():
+    low = compute_scores(
+        {
+            "sdq_worried": 0,
+            "sdq_unhappy": 0,
+            "sdq_get_angry": 0,
+            "sdq_think_before_act": 2,
+            "sdq_restless": 0,
+            "sdq_finish_tasks": 2,
+            "sdq_has_good_friend": 2,
+            "sdq_feel_isolated": 0,
+            "sdq_help_others": 2,
+            "sdq_kind_to_younger": 2,
+        }
+    )
+    high = compute_scores(
+        {
+            "sdq_worried": 2,
+            "sdq_unhappy": 2,
+            "sdq_get_angry": 2,
+            "sdq_think_before_act": 0,
+            "sdq_restless": 2,
+            "sdq_finish_tasks": 0,
+            "sdq_has_good_friend": 0,
+            "sdq_feel_isolated": 2,
+            "sdq_help_others": 0,
+            "sdq_kind_to_younger": 0,
+        }
+    )
+    p = _sample_profile()
+    s_low = build_communication_script(scores=low, profile=p, crisis=False)
+    s_high = build_communication_script(scores=high, profile=p, crisis=False)
+    assert "轻松场景" in s_low["for_parents"] or "短对话" in s_low["for_parents"]
+    assert "稳住关系与安全" in s_high["for_parents"] or "少用指责" in s_high["for_parents"]
+    assert s_low["for_parents"] != s_high["for_parents"]
+    assert s_low["for_teachers"] != s_high["for_teachers"]
+    assert "同理强" in s_low["for_parents"]
+
+
+def test_communication_script_crisis_branch():
+    scores = compute_scores({})
+    script = build_communication_script(scores=scores, profile={}, crisis=True)
+    assert "专业" in script["for_parents"] or "安全" in script["for_parents"]
+    assert "心理老师" in script["for_teachers"] or "转介" in script["for_teachers"]
