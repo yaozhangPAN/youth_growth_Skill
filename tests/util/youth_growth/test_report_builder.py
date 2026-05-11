@@ -1,7 +1,12 @@
 """Tests for report_builder helpers."""
 from __future__ import annotations
 
-from util.youth_growth.report_builder import build_communication_script, build_recommended_actions
+from util.youth_growth.report_builder import (
+    build_communication_script,
+    build_detailed_report,
+    build_recommended_actions,
+)
+from util.youth_growth.curve_engine import get_yearly_curve
 from util.youth_growth.scoring import compute_scores
 
 
@@ -134,3 +139,56 @@ def test_communication_script_crisis_branch():
     script = build_communication_script(scores=scores, profile={}, crisis=True)
     assert "安全" in script["for_parents"] or "专业" in script["for_parents"]
     assert "心理老师" in script["for_teachers"] or "转介" in script["for_teachers"]
+
+
+def test_communication_script_crisis_includes_reasons_with_context():
+    scores = compute_scores({})
+    script = build_communication_script(
+        scores=scores,
+        profile={},
+        crisis=True,
+        report_context={"crisis_reasons": ["问卷出现自伤相关线索", "情绪极端波动"]},
+    )
+    assert "问卷出现自伤相关线索" in script["for_parents"]
+    assert "情绪极端波动" in script["for_parents"]
+    assert "问卷出现自伤相关线索" in script["for_teachers"]
+
+
+def test_build_detailed_report_communication_uses_report_content():
+    high = compute_scores(
+        {
+            "sdq_worried": 2,
+            "sdq_unhappy": 2,
+            "sdq_get_angry": 2,
+            "sdq_think_before_act": 0,
+            "sdq_restless": 2,
+            "sdq_finish_tasks": 0,
+            "sdq_has_good_friend": 0,
+            "sdq_feel_isolated": 2,
+            "sdq_help_others": 0,
+            "sdq_kind_to_younger": 0,
+        }
+    )
+    p = _sample_profile()
+    p["subject_strengths"] = ["数理逻辑", "独立阅读"]
+    curve = get_yearly_curve("water")
+    report = build_detailed_report(
+        scores=high,
+        profile=p,
+        curve=curve,
+        peaks_troughs={"peak_years": [2031], "trough_years": [2026]},
+        crisis=False,
+        crisis_reasons=[],
+        element_resolution="birth_day_stem",
+    )
+    parents = report["communication_script"]["for_parents"]
+    teachers = report["communication_script"]["for_teachers"]
+
+    assert "欲望与分心感上升" in parents or "内心浮躁" in parents
+    assert "降低诱惑暴露" in parents or "分段学习" in parents
+    assert "固定睡眠窗口" in parents
+    assert "数理逻辑" in parents or "独立阅读" in parents
+    assert "报告中的具体说明为：" in parents
+
+    assert "专注力波动" in teachers
+    assert "根据出生日期计算日干" in teachers

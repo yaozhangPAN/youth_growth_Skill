@@ -370,6 +370,130 @@ def _parent_lines_for_top_labels(top_labels: list[str]) -> list[str]:
     return out
 
 
+_LEVEL_ORDER_SCRIPT: dict[str, int] = {"重点关注": 0, "需关注": 1, "稳定/保护": 2}
+
+
+def _parent_personal_from_report(ctx: dict[str, Any]) -> list[str]:
+    """从报告摘要中抽取可复述给家长的句子，减少泛化套话。"""
+    out: list[str] = []
+    tp = ctx.get("top_focus_labels")
+    if isinstance(tp, list) and tp:
+        labels = [str(x) for x in tp if x]
+        if labels:
+            out.append(
+                "在本报告整合的结果里，当前更需要被耐心回应的困扰线索，主要集中于："
+                f"{'、'.join(labels)}。后面与您同步时，我们会尽量对准这些具体内容来谈，而不是泛泛讨论「态度好不好」。"
+            )
+    py = ctx.get("peak_years") or []
+    tw = ctx.get("trough_years") or []
+    fy = ctx.get("forecast_peak_years") or []
+    tv = ctx.get("forecast_trough_years") or []
+    year_bits: list[str] = []
+    if (isinstance(py, list) and py) or (isinstance(tw, list) and tw):
+        py_s = "、".join(str(y) for y in py) if py else "—"
+        tw_s = "、".join(str(y) for y in tw) if tw else "—"
+        year_bits.append(
+            f"成长曲线侧重角度的高峰与低谷年份，在报告中标注为高峰 {py_s}、低谷 {tw_s}。"
+        )
+    if (isinstance(fy, list) and fy) or (isinstance(tv, list) and tv):
+        fy_s = "、".join(str(y) for y in fy) if fy else "—"
+        tv_s = "、".join(str(y) for y in tv) if tv else "—"
+        year_bits.append(
+            f"流年综合走势上，相对更有利的段落约落在 {fy_s}；更需要放慢节奏、减轻期待的提示年份约落在 {tv_s}。"
+        )
+    if year_bits:
+        out.append("".join(year_bits) + "这些用于安排节奏与期望的参考，不作对孩子的标签化判断。")
+
+    snippets = ctx.get("timeline_snippets")
+    if isinstance(snippets, list) and snippets:
+        s0 = snippets[0]
+        if isinstance(s0, dict):
+            y = s0.get("year")
+            ps = str(s0.get("psych_state") or "").strip()
+            ga = str(s0.get("family_action") or "").strip()
+            if y is not None and ps:
+                frag = f"报告对{y}年前后的一段心理侧写为：{ps}"
+                if ga:
+                    frag += f"在家庭侧，材料建议可沿「{ga}」这一方向给予支持。"
+                out.append(frag)
+
+    act = str(ctx.get("action_next_2_weeks") or "").strip()
+    if act:
+        out.append(
+            f"报告在「未来两周」列出的第一条行动建议是：{act}建议您先评估家庭实际条件，再与我一起微调节奏与分工。"
+        )
+
+    subs = ctx.get("subject_strengths")
+    if isinstance(subs, list) and subs:
+        clean = [str(s) for s in subs[:4] if s]
+        if clean:
+            out.append(
+                "报告也点到了孩子较容易建立信心的学习或兴趣入口：" + "、".join(clean) + "。沟通里可以从这里找一个小的突破口。"
+            )
+    return out
+
+
+def _parent_dimension_from_report(details: list[dict[str, Any]], *, limit: int = 2) -> list[str]:
+    out: list[str] = []
+    for item in details[:limit]:
+        lab = str(item.get("label") or "").strip()
+        interp = str(item.get("interpretation") or "").strip()
+        lvl = str(item.get("level") or "").strip()
+        if not lab or not interp:
+            continue
+        lvl_clause = f"，判断等级为「{lvl}」" if lvl else ""
+        out.append(
+            f"关于「{lab}」维度{lvl_clause}，报告中的具体说明为：{interp}"
+            "与您沟通时，我会尽量把这些文字转译成可执行的家庭回应方式，而不是停留在抽象评价。"
+        )
+    return out
+
+
+def _teacher_personal_from_report(ctx: dict[str, Any]) -> list[str]:
+    out: list[str] = []
+    details = ctx.get("dimension_details")
+    if isinstance(details, list):
+        for item in details[:2]:
+            if not isinstance(item, dict):
+                continue
+            lab = str(item.get("label") or "").strip()
+            interp = str(item.get("interpretation") or "").strip()
+            if lab and interp:
+                out.append(
+                    f"与家长同步报告时，可把「{lab}」与您日常观察到的课堂现象对齐，并引用报告表述：{interp}"
+                )
+    snippets = ctx.get("timeline_snippets")
+    wo = ""
+    if isinstance(snippets, list):
+        for s in snippets[:2]:
+            if not isinstance(s, dict):
+                continue
+            w = str(s.get("watchout") or "").strip()
+            if w:
+                wo = w
+                break
+    if wo:
+        out.append(
+            f"报告对阶段性需要留意的信号提醒如下：{wo}这可作为您与家长谈话时的客观锚点，减少凭印象裹挟情绪。"
+        )
+    fy = ctx.get("forecast_peak_years") or []
+    tv = ctx.get("forecast_trough_years") or []
+    if (isinstance(fy, list) and fy) or (isinstance(tv, list) and tv):
+        fy_s = "、".join(str(y) for y in fy) if fy else "—"
+        tv_s = "、".join(str(y) for y in tv) if tv else "—"
+        out.append(
+            "谈及节奏安排时，可引用报告中的流年标注："
+            f"相对有利段落约落在 {fy_s}；更需要放慢支持的时段约落在 {tv_s}。"
+            "邀请家长和孩子一起协商计划，而不是单方面追加任务。"
+        )
+    ern = str(ctx.get("element_resolution_note") or "").strip()
+    if ern:
+        out.append(
+            f"若家长问起「五行倾向依据」，报告中的判定说明为：{ern}。用一句话交代即可，避免展开成神秘叙事。"
+        )
+    return out
+
+
 def _parent_closing_therapist(tier: str, flags: list[str], wb: float) -> str:
     """收尾略有变化，减少同一句结尾的模版感。"""
     seed = (len(flags) + int(wb)) % 3
@@ -424,20 +548,33 @@ def build_communication_script(
     scores: dict[str, Any],
     profile: dict[str, Any],
     crisis: bool,
+    report_context: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     """给家长 / 老师的沟通参考：亲切、有边界的心理咨询师口吻，少套话、少段子感。"""
     if crisis:
-        return {
-            "for_parents": (
-                "此刻最重要的是安全与陪伴。\n\n"
-                "请您先稳定自己的情绪，用简短、明确的语言让孩子知道：您在他身边，此刻不以批评或追问为主。"
-                "请尽快联系具备资质的专业机构或医院心理服务，由可信赖的成年人陪同，本内容不能替代危机评估与干预。"
-            ),
-            "for_teachers": (
-                "危机情境下，请先依学校流程保护孩子隐私与安全，避免在班级内展开细节讨论。\n\n"
-                "建议由指定教师单独陪伴并转介学校心理老师，做好简要记录；课业要求可暂时降级，以稳定为第一优先。"
-            ),
-        }
+        parent_base = (
+            "此刻最重要的是安全与陪伴。\n\n"
+            "请您先稳定自己的情绪，用简短、明确的语言让孩子知道：您在他身边，此刻不以批评或追问为主。"
+            "请尽快联系具备资质的专业机构或医院心理服务，由可信赖的成年人陪同，本内容不能替代危机评估与干预。"
+        )
+        teacher_base = (
+            "危机情境下，请先依学校流程保护孩子隐私与安全，避免在班级内展开细节讨论。\n\n"
+            "建议由指定教师单独陪伴并转介学校心理老师，做好简要记录；课业要求可暂时降级，以稳定为第一优先。"
+        )
+        reasons: list[str] = []
+        if report_context:
+            raw = report_context.get("crisis_reasons")
+            if isinstance(raw, list):
+                reasons = [str(r) for r in raw if r]
+        if reasons:
+            joined = "；".join(reasons[:5])
+            parent_base += (
+                "\n\n系统筛查留意到的线索包括：" + joined + "。请您在与专业人员沟通时一并说明，便于完整评估。"
+            )
+            teacher_base += (
+                "\n\n筛查记录到的线索要点：" + joined + "。请在校内交接材料中客观摘录，避免二次伤害性描述。"
+            )
+        return {"for_parents": parent_base, "for_teachers": teacher_base}
 
     tier = str(scores.get("risk_tier") or "medium")
     wellbeing = scores.get("mental_wellbeing_score")
@@ -453,9 +590,22 @@ def build_communication_script(
     emo_style = str((profile.get("emotion_and_friendship") or {}).get("style") or "").strip()
 
     parent_parts: list[str] = [_parent_opening_therapist(tier, wb)]
+    has_report = bool(report_context)
+
+    if has_report:
+        parent_parts.extend(_parent_personal_from_report(report_context))  # type: ignore[arg-type]
+
+    dim_chunks: list[str] = []
+    if has_report:
+        details = report_context.get("dimension_details")  # type: ignore[union-attr]
+        if isinstance(details, list):
+            dim_chunks = _parent_dimension_from_report([d for d in details if isinstance(d, dict)])
+        if not dim_chunks:
+            dim_chunks = _parent_lines_for_top_labels(top_labels)
+    else:
+        dim_chunks = _parent_lines_for_top_labels(top_labels)
 
     # 微调顺序：减少每次同一骨架的「模版感」
-    dim_chunks = _parent_lines_for_top_labels(top_labels)
     temp_line = _parent_temperament_therapist(profile)
     peer_line = _parent_peer_emotion_therapist(emo_style)
     use_dim_first = (int(wb) + len(flags)) % 2 == 0
@@ -488,14 +638,17 @@ def build_communication_script(
     for_parents = "\n\n".join(parent_parts)
 
     teacher_parts: list[str] = [_teacher_opening_therapist(tier)]
+    if report_context:
+        teacher_parts.extend(_teacher_personal_from_report(report_context))
 
+    max_flag_lines = 1 if report_context else 2
     n_tf = 0
     for flag in _prioritize_flags(flags):
         line = _TEACHER_FLAG_SCRIPT.get(flag)
         if line:
             teacher_parts.append(line)
             n_tf += 1
-        if n_tf >= 2:
+        if n_tf >= max_flag_lines:
             break
 
     if not n_tf and top_labels:
@@ -627,6 +780,43 @@ def build_detailed_report(
             "暂停以成绩为中心的沟通，优先稳定安全与情绪。",
         ]
 
+    dimension_top = sorted(
+        dimension_analysis,
+        key=lambda x: (_LEVEL_ORDER_SCRIPT.get(str(x.get("level", "")), 9),),
+    )[:3]
+
+    timeline_snippets: list[dict[str, Any]] = []
+    for row in curve[:2]:
+        if not isinstance(row, dict):
+            continue
+        timeline_snippets.append(
+            {
+                "year": row.get("year"),
+                "psych_state": str(row.get("psych_state") or ""),
+                "family_action": str(row.get("guidance") or ""),
+                "watchout": str(row.get("concern") or ""),
+            }
+        )
+
+    next_two = action_plan.get("next_2_weeks") or []
+    action_first = str(next_two[0]) if next_two else ""
+    subs_raw = profile.get("subject_strengths")
+    strength_slice = subs_raw[:3] if isinstance(subs_raw, list) else []
+
+    report_context: dict[str, Any] = {
+        "top_focus_labels": top_focus,
+        "peak_years": list(peak_years) if isinstance(peak_years, list) else [],
+        "trough_years": list(trough_years) if isinstance(trough_years, list) else [],
+        "forecast_peak_years": forecast_peak_years,
+        "forecast_trough_years": forecast_trough_years,
+        "dimension_details": dimension_top,
+        "timeline_snippets": timeline_snippets,
+        "action_next_2_weeks": action_first,
+        "subject_strengths": strength_slice,
+        "element_resolution_note": resolution_text,
+        "crisis_reasons": list(crisis_reasons) if crisis_reasons else [],
+    }
+
     return {
         "overview": "本报告用于教育场景下的成长观察与家校沟通，不构成医学诊断。",
         "risk_snapshot": {
@@ -655,5 +845,7 @@ def build_detailed_report(
         "dimension_analysis": dimension_analysis,
         "growth_timeline": timeline,
         "action_plan": action_plan,
-        "communication_script": build_communication_script(scores=scores, profile=profile, crisis=crisis),
+        "communication_script": build_communication_script(
+            scores=scores, profile=profile, crisis=crisis, report_context=report_context
+        ),
     }
