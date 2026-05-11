@@ -5,97 +5,200 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>青少年成长评估</title>
     <style>
+      :root {
+        --primary: #0066cc;
+        --primary-focus: #0071e3;
+        --primary-on-dark: #2997ff;
+        --ink: #1d1d1f;
+        --body-muted: #7a7a7a;
+        --divider-soft: #f0f0f0;
+        --hairline: #e0e0e0;
+        --canvas: #ffffff;
+        --canvas-parchment: #f5f5f7;
+        --surface-pearl: #fafafc;
+        --surface-tile-1: #272729;
+        --surface-black: #000000;
+        --radius-sm: 8px;
+        --radius-lg: 18px;
+        --radius-pill: 9999px;
+      }
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-        background: #f1f5f9;
-        color: #0f172a;
+        color: var(--ink);
+        background: var(--canvas);
+        font-family: "SF Pro Text", "SF Pro Display", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-size: 17px;
+        line-height: 1.47;
+        letter-spacing: -0.28px;
+      }
+      .global-nav {
+        height: 44px;
+        background: var(--surface-black);
+        color: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+      .nav-inner {
+        max-width: 1440px;
+        height: 100%;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        font-size: 12px;
+        letter-spacing: -0.12px;
+      }
+      .nav-links {
+        display: inline-flex;
+        gap: 20px;
+        font-size: 12px;
+        letter-spacing: -0.12px;
+        opacity: 0.92;
+      }
+      .sub-nav {
+        position: sticky;
+        top: 44px;
+        z-index: 10;
+        background: rgba(245, 245, 247, 0.82);
+        border-bottom: 1px solid var(--divider-soft);
+        backdrop-filter: saturate(180%) blur(20px);
+      }
+      .sub-nav-inner {
+        max-width: 1440px;
+        min-height: 52px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .sub-nav-title {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.19;
+        letter-spacing: 0.23px;
+      }
+      .sub-nav-meta {
+        font-size: 14px;
+        color: #333333;
+        letter-spacing: -0.22px;
       }
       .wrap {
-        max-width: 1180px;
+        max-width: 1440px;
         margin: 0 auto;
-        padding: 20px 16px 28px;
       }
       .header {
-        background: linear-gradient(135deg, #1d4ed8, #0f766e);
-        color: #fff;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 16px;
+        background: var(--canvas);
+        padding: 80px 32px 48px;
+        border-bottom: 1px solid var(--divider-soft);
       }
       .header h1 {
         margin: 0;
-        font-size: 26px;
+        font-size: 56px;
+        font-weight: 600;
+        line-height: 1.07;
+        letter-spacing: -0.28px;
       }
       .header p {
-        margin: 8px 0 0;
-        opacity: 0.95;
+        max-width: 980px;
+        margin: 16px 0 0;
+        font-size: 24px;
+        font-weight: 300;
+        line-height: 1.5;
+        letter-spacing: 0;
       }
       .grid {
         display: grid;
-        grid-template-columns: 1.1fr 1fr;
-        gap: 16px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 24px;
+        padding: 32px;
+        background: var(--canvas-parchment);
       }
       .card {
-        background: #fff;
-        border: 1px solid #dbe4ee;
-        border-radius: 14px;
-        padding: 16px;
+        background: var(--canvas);
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        padding: 24px;
       }
       .card h2 {
-        margin: 0 0 12px;
-        font-size: 18px;
+        margin: 0 0 16px;
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: -0.3px;
       }
       .meta-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
         margin-bottom: 12px;
       }
       .field label {
         display: block;
-        font-size: 12px;
-        color: #475569;
         margin-bottom: 6px;
+        font-size: 14px;
+        color: #333333;
+        line-height: 1.29;
+        letter-spacing: -0.22px;
       }
       .hint {
         margin: 6px 0;
-        font-size: 12px;
-        color: #64748b;
+        font-size: 14px;
+        color: var(--body-muted);
+        line-height: 1.43;
+        letter-spacing: -0.22px;
       }
       .field input,
-      .field textarea {
+      .field textarea,
+      .curve-controls select {
         width: 100%;
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        padding: 10px;
-        font-size: 14px;
+        color: var(--ink);
+        background: var(--canvas);
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-pill);
+        padding: 12px 20px;
+        font-size: 17px;
+        line-height: 1.47;
+        letter-spacing: -0.28px;
+      }
+      .field input:focus,
+      .field textarea:focus,
+      .curve-controls select:focus {
+        outline: 2px solid var(--primary-focus);
+        outline-offset: 1px;
       }
       .field textarea {
-        min-height: 88px;
+        min-height: 110px;
+        border-radius: var(--radius-lg);
         resize: vertical;
       }
       .metric-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 12px;
       }
       .metric-item {
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 10px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        background: var(--surface-pearl);
       }
       .metric-item .name {
-        font-size: 13px;
+        font-size: 17px;
         font-weight: 600;
+        line-height: 1.24;
       }
       .metric-item .hint {
         margin-top: 4px;
-        font-size: 12px;
-        color: #64748b;
       }
       .metric-item .control {
         display: flex;
@@ -105,94 +208,115 @@
       }
       .metric-item input[type="range"] {
         flex: 1;
+        accent-color: var(--primary);
       }
       .badge {
-        min-width: 28px;
+        min-width: 34px;
+        padding: 3px 10px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-pill);
         text-align: center;
-        font-weight: 700;
-        color: #1e3a8a;
-        background: #dbeafe;
-        border-radius: 8px;
-        padding: 3px 6px;
+        background: var(--canvas);
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 600;
       }
       .actions {
-        margin-top: 14px;
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
       }
       button {
-        border: 0;
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-size: 14px;
+        border-radius: var(--radius-pill);
+        border: 1px solid transparent;
+        padding: 11px 22px;
+        font-size: 17px;
+        line-height: 1;
+        font-weight: 400;
+        letter-spacing: 0;
         cursor: pointer;
-        margin-right: 8px;
+        transition: transform 0.12s ease, background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+      }
+      button:active {
+        transform: scale(0.95);
+      }
+      button:focus-visible {
+        outline: 2px solid var(--primary-focus);
+        outline-offset: 1px;
       }
       .btn-primary {
-        background: #2563eb;
-        color: #fff;
-        font-weight: 700;
+        background: var(--primary);
+        color: #ffffff;
       }
       .btn-plain {
-        background: #e2e8f0;
-        color: #0f172a;
+        background: var(--canvas);
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
       }
       .status {
         margin: 0 0 12px;
         font-size: 14px;
+        line-height: 1.43;
       }
       .status.ok {
-        color: #0f766e;
+        color: var(--primary);
       }
       .status.error {
-        color: #b91c1c;
+        color: #b42318;
       }
       .summary-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
         margin-bottom: 12px;
       }
       .summary-item {
-        border: 1px solid #dbe4ee;
-        border-radius: 10px;
-        padding: 10px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        background: var(--canvas);
       }
       .summary-item .k {
         font-size: 12px;
-        color: #64748b;
+        color: var(--body-muted);
       }
       .summary-item .v {
         margin-top: 6px;
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 28px;
+        font-weight: 400;
+        line-height: 1.14;
       }
       .block-title {
-        margin: 12px 0 8px;
-        font-size: 14px;
-        font-weight: 700;
+        margin: 24px 0 8px;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.19;
+        letter-spacing: 0.23px;
       }
       ul {
         margin: 8px 0 0;
-        padding-left: 18px;
+        padding-left: 20px;
       }
       li {
         margin: 5px 0;
       }
-      .json-panel {
-        margin-top: 12px;
-      }
       .report-section {
-        margin-top: 14px;
-        padding-top: 10px;
-        border-top: 1px solid #e2e8f0;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--divider-soft);
       }
       .report-overview {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        border-radius: 10px;
-        padding: 10px;
-        color: #1e3a8a;
-        font-size: 13px;
-        line-height: 1.5;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        padding: 14px 16px;
+        background: var(--canvas-parchment);
+        color: var(--ink);
       }
       .tag-list {
         display: flex;
@@ -201,11 +325,12 @@
         margin-top: 8px;
       }
       .tag {
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: #e2e8f0;
-        color: #334155;
-        font-size: 12px;
+        padding: 6px 12px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-pill);
+        background: var(--canvas);
+        color: #333333;
+        font-size: 14px;
       }
       .table-wrap {
         overflow: auto;
@@ -214,70 +339,67 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 8px;
-        font-size: 13px;
+        font-size: 14px;
       }
       th,
       td {
-        border: 1px solid #e2e8f0;
-        padding: 8px;
+        border: 1px solid var(--hairline);
+        padding: 10px;
         text-align: left;
         vertical-align: top;
       }
       th {
-        background: #f8fafc;
-        color: #334155;
+        background: var(--canvas-parchment);
+        color: #333333;
       }
-      .timeline-item {
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 10px;
+      .timeline-item,
+      .sub-box,
+      .scripts .script-box {
         margin-top: 8px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        background: var(--canvas);
       }
       .timeline-item .year {
-        font-weight: 700;
+        font-weight: 600;
       }
-      .timeline-item .meta {
-        color: #475569;
-        font-size: 12px;
-        margin-top: 4px;
+      .timeline-item .meta,
+      .sub-box .k {
+        color: var(--body-muted);
+        font-size: 14px;
+        line-height: 1.43;
       }
-      .scripts {
+      .scripts,
+      .sub-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .scripts .script-box {
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 10px;
+        gap: 12px;
       }
       .curve-chart {
         margin-top: 8px;
-        border: 1px solid #dbe4ee;
-        border-radius: 10px;
-        padding: 8px;
-        background: #f8fafc;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        background: var(--canvas-parchment);
       }
       .curve-controls {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 8px;
         margin-top: 6px;
       }
-      .curve-controls label {
-        font-size: 12px;
-        color: #475569;
+      .curve-controls label,
+      .curve-hint {
+        font-size: 14px;
+        color: var(--body-muted);
       }
       .curve-controls select {
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 6px 8px;
-        font-size: 13px;
-        background: #fff;
-      }
-      .curve-hint {
-        font-size: 12px;
-        color: #64748b;
+        width: auto;
+        min-width: 240px;
+        padding: 8px 12px;
+        font-size: 14px;
       }
       .curve-chart svg {
         width: 100%;
@@ -286,42 +408,35 @@
       }
       .curve-legend {
         display: flex;
-        gap: 10px;
         flex-wrap: wrap;
+        gap: 12px;
         margin-top: 8px;
       }
       .legend-item {
-        font-size: 12px;
-        color: #475569;
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        color: #333333;
+        font-size: 14px;
       }
       .legend-dot {
         width: 10px;
         height: 10px;
-        border-radius: 999px;
+        border-radius: var(--radius-pill);
       }
-      .sub-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+      .json-panel {
+        margin-top: 16px;
       }
-      .sub-box {
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 10px;
-      }
-      .sub-box .k {
-        font-size: 12px;
-        color: #64748b;
+      .json-panel summary {
+        color: var(--primary);
+        cursor: pointer;
       }
       pre {
         margin: 6px 0 0;
-        background: #0b1220;
-        color: #dbeafe;
-        border-radius: 10px;
-        padding: 12px;
+        background: var(--surface-tile-1);
+        color: #ffffff;
+        border-radius: var(--radius-lg);
+        padding: 16px;
         max-height: 280px;
         overflow: auto;
         white-space: pre-wrap;
@@ -329,38 +444,63 @@
         font-size: 12px;
         line-height: 1.45;
       }
-      @media (max-width: 980px) {
+      @media (max-width: 1068px) {
+        .header h1 {
+          font-size: 40px;
+        }
         .grid {
           grid-template-columns: 1fr;
         }
+      }
+      @media (max-width: 833px) {
+        .nav-links,
+        .sub-nav-meta {
+          display: none;
+        }
+        .header {
+          padding: 48px 20px 32px;
+        }
+        .grid {
+          padding: 20px;
+        }
         .summary-grid,
         .metric-grid,
-        .meta-row {
-          grid-template-columns: 1fr;
-        }
-        .scripts {
-          grid-template-columns: 1fr;
-        }
+        .meta-row,
+        .scripts,
         .sub-grid {
           grid-template-columns: 1fr;
         }
       }
-      @media print {
-        body {
-          background: #fff;
+      @media (max-width: 640px) {
+        .header h1 {
+          font-size: 34px;
         }
+        .header p {
+          font-size: 17px;
+          line-height: 1.47;
+        }
+        .card h2 {
+          font-size: 34px;
+          line-height: 1.2;
+        }
+      }
+      @media print {
+        .global-nav,
+        .sub-nav,
         .header,
         .actions,
         .json-panel {
           display: none;
         }
         .grid {
-          grid-template-columns: 1fr;
+          display: block;
+          padding: 0;
+          background: #ffffff;
         }
         .card {
           border: 0;
-          box-shadow: none;
           padding: 0;
+          page-break-inside: avoid;
         }
         .metric-grid,
         .meta-row {
@@ -370,6 +510,17 @@
     </style>
   </head>
   <body>
+    <header class="global-nav">
+      <div class="nav-inner">
+        <span class="brand">Youth Growth Skill</span>
+        <span class="nav-links">Assess · Curve · Report</span>
+      </div>
+    </header>
+    <div class="sub-nav">
+      <div class="sub-nav-inner">
+        <p class="sub-nav-title">青少年成长评估</p>
+      </div>
+    </div>
     <main class="wrap">
       <section class="header">
         <h1>青少年成长评估</h1>
@@ -408,9 +559,6 @@
 
           <div class="actions">
             <button id="assessBtn" class="btn-primary">开始评估</button>
-            <button id="sampleBtn" class="btn-plain">填入示例</button>
-            <button id="healthBtn" class="btn-plain">服务检测</button>
-            <button id="skillsBtn" class="btn-plain">查看技能列表</button>
           </div>
         </article>
 
@@ -461,8 +609,8 @@
             <div class="curve-chart">
               <svg id="forecastChart" viewBox="0 0 640 240" role="img" aria-label="流年预测曲线"></svg>
               <div class="curve-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>综合走势</span>
-                <span class="legend-item" id="selectedDimensionLegend"><span class="legend-dot" id="selectedDimensionLegendDot" style="background:#16a34a"></span><span id="selectedDimensionLegendText">自律指数</span></span>
+                <span class="legend-item"><span class="legend-dot" style="background:#0066cc"></span>综合走势</span>
+                <span class="legend-item" id="selectedDimensionLegend"><span class="legend-dot" id="selectedDimensionLegendDot" style="background:#1d1d1f"></span><span id="selectedDimensionLegendText">自律指数</span></span>
               </div>
             </div>
           </div>
@@ -622,13 +770,13 @@
       };
 
       const curveDimensionMeta = {
-        overall_index: { label: "综合走势", color: "#2563eb" },
-        self_discipline_index: { label: "自律指数", color: "#16a34a" },
-        emotion_stability_index: { label: "情绪稳定指数", color: "#ea580c" },
-        social_adaptability_index: { label: "社交适应指数", color: "#0f766e" },
-        hands_on_action_index: { label: "动手行动指数", color: "#7c3aed" },
-        health_constitution_index: { label: "体质状态指数", color: "#b45309" },
-        learning_focus_index: { label: "学习专注指数", color: "#2563eb" }
+        overall_index: { label: "综合走势", color: "#0066cc" },
+        self_discipline_index: { label: "自律指数", color: "#1d1d1f" },
+        emotion_stability_index: { label: "情绪稳定指数", color: "#333333" },
+        social_adaptability_index: { label: "社交适应指数", color: "#7a7a7a" },
+        hands_on_action_index: { label: "动手行动指数", color: "#2997ff" },
+        health_constitution_index: { label: "体质状态指数", color: "#2a2a2c" },
+        learning_focus_index: { label: "学习专注指数", color: "#0071e3" }
       };
 
       const metricGridEl = document.getElementById("metricGrid");
@@ -804,7 +952,7 @@
           selectedDimensionLegendDotEl.style.background = selectedMeta.color;
         }
         if (!Array.isArray(points) || points.length === 0) {
-          const empty = createSvgNode("text", { x: 20, y: 30, fill: "#64748b", "font-size": 14 });
+          const empty = createSvgNode("text", { x: 20, y: 30, fill: "#7a7a7a", "font-size": 14 });
           empty.textContent = "暂无流年曲线数据";
           forecastChartEl.appendChild(empty);
           return;
@@ -836,14 +984,14 @@
               y1: y,
               x2: left + plotW,
               y2: y,
-              stroke: "#e2e8f0",
+              stroke: "#e0e0e0",
               "stroke-width": 1
             })
           );
           const t = createSvgNode("text", {
             x: left - 20,
             y: y + 4,
-            fill: "#64748b",
+            fill: "#7a7a7a",
             "font-size": 11
           });
           t.textContent = String(tick);
@@ -855,14 +1003,14 @@
           const t = createSvgNode("text", {
             x: x - 14,
             y: top + plotH + 18,
-            fill: "#475569",
+            fill: "#333333",
             "font-size": 11
           });
           t.textContent = String(year);
           forecastChartEl.appendChild(t);
         });
 
-        const series = [{ key: "overall_index", color: "#2563eb" }];
+        const series = [{ key: "overall_index", color: "#0066cc" }];
         if (selectedKey !== "overall_index") {
           series.push({ key: selectedKey, color: selectedMeta.color });
         }
@@ -1171,33 +1319,6 @@
           setStatus("评估完成", true);
         } catch (err) {
           setStatus(`评估失败：${String(err)}`, false);
-        }
-      });
-
-      document.getElementById("sampleBtn").addEventListener("click", () => {
-        applySampleData();
-        setStatus("已填入示例数据", true);
-      });
-
-      document.getElementById("healthBtn").addEventListener("click", async () => {
-        setStatus("正在检测服务状态...", true);
-        try {
-          const result = await postJson("/health", {});
-          rawOutputEl.textContent = JSON.stringify(result, null, 2);
-          setStatus("服务状态正常", true);
-        } catch (err) {
-          setStatus(`服务检测失败：${String(err)}`, false);
-        }
-      });
-
-      document.getElementById("skillsBtn").addEventListener("click", async () => {
-        setStatus("正在加载技能列表...", true);
-        try {
-          const result = await postJson("/skills/v1_0/list", {});
-          rawOutputEl.textContent = JSON.stringify(result, null, 2);
-          setStatus("技能列表已加载", true);
-        } catch (err) {
-          setStatus(`技能列表加载失败：${String(err)}`, false);
         }
       });
 
