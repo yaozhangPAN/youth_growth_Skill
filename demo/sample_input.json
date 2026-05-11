@@ -1,0 +1,22 @@
+{
+  "birth": {
+    "year": 2012,
+    "month": 6,
+    "day": 15,
+    "hour": 14
+  },
+  "questionnaire": {
+    "sdq_worried": 1,
+    "sdq_unhappy": 1,
+    "sdq_get_angry": 1,
+    "sdq_think_before_act": 2,
+    "sdq_restless": 1,
+    "sdq_finish_tasks": 2,
+    "sdq_has_good_friend": 2,
+    "sdq_feel_isolated": 1,
+    "sdq_help_others": 2,
+    "sdq_kind_to_younger": 2,
+    "self_harm_signal": 1,
+    "notes": "近期考试较多，晚上睡得偏晚。"
+  }
+}

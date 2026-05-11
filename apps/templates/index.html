@@ -1,0 +1,1225 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>青少年成长评估</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 20px 16px 28px;
+      }
+      .header {
+        background: linear-gradient(135deg, #1d4ed8, #0f766e);
+        color: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 26px;
+      }
+      .header p {
+        margin: 8px 0 0;
+        opacity: 0.95;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 16px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #dbe4ee;
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .card h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+      .meta-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .field label {
+        display: block;
+        font-size: 12px;
+        color: #475569;
+        margin-bottom: 6px;
+      }
+      .hint {
+        margin: 6px 0;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .field input,
+      .field textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 14px;
+      }
+      .field textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .metric-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .metric-item .name {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .metric-item .hint {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .metric-item .control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .metric-item input[type="range"] {
+        flex: 1;
+      }
+      .badge {
+        min-width: 28px;
+        text-align: center;
+        font-weight: 700;
+        color: #1e3a8a;
+        background: #dbeafe;
+        border-radius: 8px;
+        padding: 3px 6px;
+      }
+      .actions {
+        margin-top: 14px;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      .btn-primary {
+        background: #2563eb;
+        color: #fff;
+        font-weight: 700;
+      }
+      .btn-plain {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .status {
+        margin: 0 0 12px;
+        font-size: 14px;
+      }
+      .status.ok {
+        color: #0f766e;
+      }
+      .status.error {
+        color: #b91c1c;
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .summary-item {
+        border: 1px solid #dbe4ee;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .summary-item .k {
+        font-size: 12px;
+        color: #64748b;
+      }
+      .summary-item .v {
+        margin-top: 6px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .block-title {
+        margin: 12px 0 8px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+      li {
+        margin: 5px 0;
+      }
+      .json-panel {
+        margin-top: 12px;
+      }
+      .report-section {
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px solid #e2e8f0;
+      }
+      .report-overview {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        padding: 10px;
+        color: #1e3a8a;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .tag {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: #334155;
+        font-size: 12px;
+      }
+      .table-wrap {
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      th,
+      td {
+        border: 1px solid #e2e8f0;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f8fafc;
+        color: #334155;
+      }
+      .timeline-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px;
+        margin-top: 8px;
+      }
+      .timeline-item .year {
+        font-weight: 700;
+      }
+      .timeline-item .meta {
+        color: #475569;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .scripts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .scripts .script-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .curve-chart {
+        margin-top: 8px;
+        border: 1px solid #dbe4ee;
+        border-radius: 10px;
+        padding: 8px;
+        background: #f8fafc;
+      }
+      .curve-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      .curve-controls label {
+        font-size: 12px;
+        color: #475569;
+      }
+      .curve-controls select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 6px 8px;
+        font-size: 13px;
+        background: #fff;
+      }
+      .curve-hint {
+        font-size: 12px;
+        color: #64748b;
+      }
+      .curve-chart svg {
+        width: 100%;
+        height: 240px;
+        display: block;
+      }
+      .curve-legend {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .legend-item {
+        font-size: 12px;
+        color: #475569;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+      }
+      .sub-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .sub-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .sub-box .k {
+        font-size: 12px;
+        color: #64748b;
+      }
+      pre {
+        margin: 6px 0 0;
+        background: #0b1220;
+        color: #dbeafe;
+        border-radius: 10px;
+        padding: 12px;
+        max-height: 280px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .summary-grid,
+        .metric-grid,
+        .meta-row {
+          grid-template-columns: 1fr;
+        }
+        .scripts {
+          grid-template-columns: 1fr;
+        }
+        .sub-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media print {
+        body {
+          background: #fff;
+        }
+        .header,
+        .actions,
+        .json-panel {
+          display: none;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          border: 0;
+          box-shadow: none;
+          padding: 0;
+        }
+        .metric-grid,
+        .meta-row {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="header">
+        <h1>青少年成长评估</h1>
+        <p>填写基础信息与观察问卷后，系统将生成心理状态观察、成长曲线与教育建议。</p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>信息填写</h2>
+          <p class="hint">问卷采用 SDQ 友好短题：0=不太符合，1=有一点符合，2=非常符合。</p>
+          <div class="meta-row">
+            <div class="field">
+              <label for="birthYear">出生年</label>
+              <input id="birthYear" type="number" min="1990" max="2030" value="2012" />
+            </div>
+            <div class="field">
+              <label for="birthMonth">出生月</label>
+              <input id="birthMonth" type="number" min="1" max="12" value="6" />
+            </div>
+            <div class="field">
+              <label for="birthDay">出生日</label>
+              <input id="birthDay" type="number" min="1" max="31" value="15" />
+            </div>
+            <div class="field">
+              <label for="birthHour">出生小时（可选）</label>
+              <input id="birthHour" type="number" min="0" max="23" placeholder="0-23" />
+            </div>
+          </div>
+
+          <div class="metric-grid" id="metricGrid"></div>
+
+          <div class="field" style="margin-top: 12px">
+            <label for="notes">补充说明（可选）</label>
+            <textarea id="notes" placeholder="例如：近期考试较多，作息偏晚，与同伴互动减少。"></textarea>
+          </div>
+
+          <div class="actions">
+            <button id="assessBtn" class="btn-primary">开始评估</button>
+            <button id="sampleBtn" class="btn-plain">填入示例</button>
+            <button id="healthBtn" class="btn-plain">服务检测</button>
+            <button id="skillsBtn" class="btn-plain">查看技能列表</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>评估结果</h2>
+          <p id="status" class="status ok">就绪，可开始评估。</p>
+
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="k">风险等级</div>
+              <div class="v" id="riskTier">-</div>
+            </div>
+            <div class="summary-item">
+              <div class="k">心理健康分</div>
+              <div class="v" id="wellbeingScore">-</div>
+            </div>
+            <div class="summary-item">
+              <div class="k">五行画像</div>
+              <div class="v" id="elementLabel">-</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="block-title">心理画像摘要</div>
+            <div id="psychologySummary">暂无数据</div>
+          </div>
+
+          <div>
+            <div class="block-title">成长曲线摘要</div>
+            <div id="curveSummary">暂无数据</div>
+          </div>
+
+          <div>
+            <div class="block-title">流年预测曲线（1-5）</div>
+            <div class="curve-controls">
+              <label for="curveDimensionSelect">切换维度</label>
+              <select id="curveDimensionSelect">
+                <option value="self_discipline_index">自律指数</option>
+                <option value="emotion_stability_index">情绪稳定指数</option>
+                <option value="social_adaptability_index">社交适应指数</option>
+                <option value="hands_on_action_index">动手行动指数</option>
+                <option value="health_constitution_index">体质状态指数</option>
+                <option value="learning_focus_index">学习专注指数</option>
+                <option value="overall_index">仅看综合走势</option>
+              </select>
+              <span id="curveDimensionHint" class="curve-hint">显示综合走势 + 维度曲线</span>
+            </div>
+            <div class="curve-chart">
+              <svg id="forecastChart" viewBox="0 0 640 240" role="img" aria-label="流年预测曲线"></svg>
+              <div class="curve-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>综合走势</span>
+                <span class="legend-item" id="selectedDimensionLegend"><span class="legend-dot" id="selectedDimensionLegendDot" style="background:#16a34a"></span><span id="selectedDimensionLegendText">自律指数</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="block-title">五行深度画像</div>
+            <div class="sub-grid">
+              <div class="sub-box">
+                <div class="k">深度心理学标签</div>
+                <div id="deepPsychTags" class="tag-list"><span class="tag">暂无</span></div>
+              </div>
+              <div class="sub-box">
+                <div class="k">性格标签</div>
+                <div id="personalityTags" class="tag-list"><span class="tag">暂无</span></div>
+              </div>
+              <div class="sub-box">
+                <div class="k">健康体质建议</div>
+                <ul id="constitutionAdvice"><li>暂无数据</li></ul>
+              </div>
+              <div class="sub-box">
+                <div class="k">学科优势</div>
+                <ul id="subjectStrengths"><li>暂无数据</li></ul>
+              </div>
+              <div class="sub-box">
+                <div class="k">潜力发展方向</div>
+                <ul id="potentialDirections"><li>暂无数据</li></ul>
+              </div>
+              <div class="sub-box">
+                <div class="k">家长养育建议</div>
+                <ul id="parentingGuidance"><li>暂无数据</li></ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="block-title">动手与自律 / 情绪与交友</div>
+            <div class="sub-grid">
+              <div class="sub-box">
+                <div class="k">动手与自律（优势）</div>
+                <ul id="handsOnStrengths"><li>暂无数据</li></ul>
+                <div class="k">风险点</div>
+                <ul id="handsOnRisks"><li>暂无数据</li></ul>
+                <div class="k">训练建议</div>
+                <ul id="handsOnAdvice"><li>暂无数据</li></ul>
+              </div>
+              <div class="sub-box">
+                <div class="k">情绪与交友风格</div>
+                <div id="emotionStyle">暂无数据</div>
+                <div class="k">风险点</div>
+                <ul id="emotionRisks"><li>暂无数据</li></ul>
+                <div class="k">建议</div>
+                <ul id="emotionAdvice"><li>暂无数据</li></ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="block-title">建议行动</div>
+            <ul id="actionsList">
+              <li>暂无建议</li>
+            </ul>
+          </div>
+
+          <div class="actions">
+            <button id="printBtn" class="btn-plain" disabled>打印家长版报告</button>
+            <button id="exportReportBtn" class="btn-plain" disabled>导出流年报告</button>
+          </div>
+
+          <section class="report-section">
+            <div class="block-title">详细报告（家长/老师版）</div>
+            <div id="reportOverview" class="report-overview">评估完成后，这里会显示详细报告摘要。</div>
+
+            <div class="block-title">关键发现</div>
+            <ul id="reportFindings">
+              <li>暂无数据</li>
+            </ul>
+
+            <div class="block-title">关注标签</div>
+            <div id="reportFlags" class="tag-list">
+              <span class="tag">暂无</span>
+            </div>
+
+            <div class="block-title">维度详细解读</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>维度</th>
+                    <th>分值</th>
+                    <th>等级</th>
+                    <th>解读</th>
+                  </tr>
+                </thead>
+                <tbody id="reportDimensionRows">
+                  <tr>
+                    <td colspan="4">暂无数据</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="block-title">年度节奏建议（2026-2031）</div>
+            <div id="reportTimeline">
+              <div class="timeline-item">暂无数据</div>
+            </div>
+
+            <div class="block-title">行动计划</div>
+            <div>
+              <div class="k">未来 2 周</div>
+              <ul id="reportPlan2Weeks"><li>暂无数据</li></ul>
+              <div class="k">1-3 个月</div>
+              <ul id="reportPlan1to3Months"><li>暂无数据</li></ul>
+              <div class="k">升级处理条件</div>
+              <ul id="reportPlanEscalation"><li>暂无数据</li></ul>
+            </div>
+
+            <div class="block-title">沟通话术建议</div>
+            <div class="scripts">
+              <div class="script-box">
+                <div class="k">给家长</div>
+                <div id="reportScriptParent">暂无数据</div>
+              </div>
+              <div class="script-box">
+                <div class="k">给老师</div>
+                <div id="reportScriptTeacher">暂无数据</div>
+              </div>
+            </div>
+          </section>
+
+          <details class="json-panel">
+            <summary>查看完整 JSON 结果</summary>
+            <pre id="rawOutput">{}</pre>
+          </details>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const metricConfigs = [
+        { key: "sdq_worried", label: "我经常担心或紧张", hint: "情绪症状", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_unhappy", label: "我最近常常不开心", hint: "情绪症状", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_get_angry", label: "我容易发脾气或顶撞", hint: "行为问题", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_think_before_act", label: "我做事前会先想一想", hint: "行为问题（正向）", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_restless", label: "我坐不太住，容易分心", hint: "多动/注意", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_finish_tasks", label: "我能把事情做完", hint: "多动/注意（正向）", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_has_good_friend", label: "我至少有一个关系不错的朋友", hint: "同伴关系（正向）", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_feel_isolated", label: "我常觉得被同学排斥", hint: "同伴关系", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_help_others", label: "我愿意主动帮助别人", hint: "亲社会行为", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "sdq_kind_to_younger", label: "我会体谅并照顾弱小", hint: "亲社会行为", min: 0, max: 2, defaultValue: 1, scaleHelp: "0 不太符合 · 1 有一点符合 · 2 非常符合" },
+        { key: "self_harm_signal", label: "近两周自伤念头（可选）", hint: "安全项（非 SDQ）", min: 1, max: 5, defaultValue: 1, scaleHelp: "1 从未 · 5 非常频繁" }
+      ];
+
+      const riskTierMap = {
+        low: "低风险",
+        medium: "中风险",
+        high: "高风险"
+      };
+
+      const curveDimensionMeta = {
+        overall_index: { label: "综合走势", color: "#2563eb" },
+        self_discipline_index: { label: "自律指数", color: "#16a34a" },
+        emotion_stability_index: { label: "情绪稳定指数", color: "#ea580c" },
+        social_adaptability_index: { label: "社交适应指数", color: "#0f766e" },
+        hands_on_action_index: { label: "动手行动指数", color: "#7c3aed" },
+        health_constitution_index: { label: "体质状态指数", color: "#b45309" },
+        learning_focus_index: { label: "学习专注指数", color: "#2563eb" }
+      };
+
+      const metricGridEl = document.getElementById("metricGrid");
+      const statusEl = document.getElementById("status");
+      const riskTierEl = document.getElementById("riskTier");
+      const wellbeingScoreEl = document.getElementById("wellbeingScore");
+      const elementLabelEl = document.getElementById("elementLabel");
+      const psychologySummaryEl = document.getElementById("psychologySummary");
+      const curveSummaryEl = document.getElementById("curveSummary");
+      const forecastChartEl = document.getElementById("forecastChart");
+      const curveDimensionSelectEl = document.getElementById("curveDimensionSelect");
+      const curveDimensionHintEl = document.getElementById("curveDimensionHint");
+      const selectedDimensionLegendEl = document.getElementById("selectedDimensionLegend");
+      const selectedDimensionLegendDotEl = document.getElementById("selectedDimensionLegendDot");
+      const selectedDimensionLegendTextEl = document.getElementById("selectedDimensionLegendText");
+      const deepPsychTagsEl = document.getElementById("deepPsychTags");
+      const personalityTagsEl = document.getElementById("personalityTags");
+      const constitutionAdviceEl = document.getElementById("constitutionAdvice");
+      const subjectStrengthsEl = document.getElementById("subjectStrengths");
+      const potentialDirectionsEl = document.getElementById("potentialDirections");
+      const parentingGuidanceEl = document.getElementById("parentingGuidance");
+      const handsOnStrengthsEl = document.getElementById("handsOnStrengths");
+      const handsOnRisksEl = document.getElementById("handsOnRisks");
+      const handsOnAdviceEl = document.getElementById("handsOnAdvice");
+      const emotionStyleEl = document.getElementById("emotionStyle");
+      const emotionRisksEl = document.getElementById("emotionRisks");
+      const emotionAdviceEl = document.getElementById("emotionAdvice");
+      const actionsListEl = document.getElementById("actionsList");
+      const rawOutputEl = document.getElementById("rawOutput");
+      const printBtnEl = document.getElementById("printBtn");
+      const exportReportBtnEl = document.getElementById("exportReportBtn");
+      const reportOverviewEl = document.getElementById("reportOverview");
+      const reportFindingsEl = document.getElementById("reportFindings");
+      const reportFlagsEl = document.getElementById("reportFlags");
+      const reportDimensionRowsEl = document.getElementById("reportDimensionRows");
+      const reportTimelineEl = document.getElementById("reportTimeline");
+      const reportPlan2WeeksEl = document.getElementById("reportPlan2Weeks");
+      const reportPlan1to3MonthsEl = document.getElementById("reportPlan1to3Months");
+      const reportPlanEscalationEl = document.getElementById("reportPlanEscalation");
+      const reportScriptParentEl = document.getElementById("reportScriptParent");
+      const reportScriptTeacherEl = document.getElementById("reportScriptTeacher");
+      const SVG_NS = "http://www.w3.org/2000/svg";
+      let lastAssessData = null;
+
+      function setStatus(message, ok = true) {
+        statusEl.textContent = message;
+        statusEl.className = `status ${ok ? "ok" : "error"}`;
+      }
+
+      function buildMetricInputs() {
+        metricGridEl.innerHTML = "";
+        metricConfigs.forEach((metric) => {
+          const wrap = document.createElement("div");
+          wrap.className = "metric-item";
+          wrap.innerHTML = `
+            <div class="name">${metric.label}</div>
+            <div class="hint">${metric.hint}</div>
+            <div class="hint">${metric.scaleHelp || ""}</div>
+            <div class="control">
+              <input
+                id="${metric.key}"
+                type="range"
+                min="${metric.min ?? 1}"
+                max="${metric.max ?? 5}"
+                value="${metric.defaultValue}"
+              />
+              <span class="badge" id="${metric.key}_value">${metric.defaultValue}</span>
+            </div>
+          `;
+          metricGridEl.appendChild(wrap);
+
+          const input = document.getElementById(metric.key);
+          const valueEl = document.getElementById(`${metric.key}_value`);
+          input.addEventListener("input", () => {
+            valueEl.textContent = input.value;
+          });
+        });
+      }
+
+      function getPayload() {
+        const questionnaire = {};
+        metricConfigs.forEach((metric) => {
+          questionnaire[metric.key] = Number(document.getElementById(metric.key).value);
+        });
+        questionnaire.notes = document.getElementById("notes").value.trim();
+        const hourRaw = String(document.getElementById("birthHour").value || "").trim();
+        const birth = {
+          year: Number(document.getElementById("birthYear").value),
+          month: Number(document.getElementById("birthMonth").value),
+          day: Number(document.getElementById("birthDay").value)
+        };
+        if (hourRaw !== "") {
+          birth.hour = Number(hourRaw);
+        }
+        return {
+          birth,
+          questionnaire
+        };
+      }
+
+      function applySampleData() {
+        document.getElementById("birthYear").value = 2012;
+        document.getElementById("birthMonth").value = 6;
+        document.getElementById("birthDay").value = 15;
+        document.getElementById("birthHour").value = "14";
+        document.getElementById("notes").value = "近期考试较多，晚上睡得偏晚。";
+        metricConfigs.forEach((metric) => {
+          const input = document.getElementById(metric.key);
+          const badge = document.getElementById(`${metric.key}_value`);
+          input.value = metric.defaultValue;
+          badge.textContent = metric.defaultValue;
+        });
+      }
+
+      function renderActions(items) {
+        actionsListEl.innerHTML = "";
+        if (!Array.isArray(items) || items.length === 0) {
+          actionsListEl.innerHTML = "<li>暂无建议</li>";
+          return;
+        }
+        items.forEach((action) => {
+          const li = document.createElement("li");
+          li.textContent = action;
+          actionsListEl.appendChild(li);
+        });
+      }
+
+      function renderList(targetEl, items, emptyText = "暂无数据") {
+        targetEl.innerHTML = "";
+        if (!Array.isArray(items) || items.length === 0) {
+          targetEl.innerHTML = `<li>${emptyText}</li>`;
+          return;
+        }
+        items.forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          targetEl.appendChild(li);
+        });
+      }
+
+      function renderTagList(targetEl, tags) {
+        targetEl.innerHTML = "";
+        if (!Array.isArray(tags) || tags.length === 0) {
+          targetEl.innerHTML = '<span class="tag">暂无</span>';
+          return;
+        }
+        tags.forEach((tag) => {
+          const span = document.createElement("span");
+          span.className = "tag";
+          span.textContent = tag;
+          targetEl.appendChild(span);
+        });
+      }
+
+      function createSvgNode(tag, attrs) {
+        const node = document.createElementNS(SVG_NS, tag);
+        Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, String(v)));
+        return node;
+      }
+
+      function renderForecastChart(points, selectedKey = "self_discipline_index") {
+        while (forecastChartEl.firstChild) {
+          forecastChartEl.removeChild(forecastChartEl.firstChild);
+        }
+        const selectedMeta = curveDimensionMeta[selectedKey] || curveDimensionMeta.self_discipline_index;
+        if (selectedKey === "overall_index") {
+          curveDimensionHintEl.textContent = "当前仅显示综合走势";
+          selectedDimensionLegendEl.style.display = "none";
+        } else {
+          curveDimensionHintEl.textContent = "显示综合走势 + 维度曲线";
+          selectedDimensionLegendEl.style.display = "inline-flex";
+          selectedDimensionLegendTextEl.textContent = selectedMeta.label;
+          selectedDimensionLegendDotEl.style.background = selectedMeta.color;
+        }
+        if (!Array.isArray(points) || points.length === 0) {
+          const empty = createSvgNode("text", { x: 20, y: 30, fill: "#64748b", "font-size": 14 });
+          empty.textContent = "暂无流年曲线数据";
+          forecastChartEl.appendChild(empty);
+          return;
+        }
+
+        const width = 640;
+        const height = 240;
+        const left = 44;
+        const right = 12;
+        const top = 16;
+        const bottom = 26;
+        const plotW = width - left - right;
+        const plotH = height - top - bottom;
+        const years = points.map((p) => p.year);
+
+        const xPos = (idx) => {
+          if (points.length === 1) {
+            return left + plotW / 2;
+          }
+          return left + (idx / (points.length - 1)) * plotW;
+        };
+        const yPos = (value) => top + ((5 - value) / 4) * plotH;
+
+        for (let tick = 1; tick <= 5; tick += 1) {
+          const y = yPos(tick);
+          forecastChartEl.appendChild(
+            createSvgNode("line", {
+              x1: left,
+              y1: y,
+              x2: left + plotW,
+              y2: y,
+              stroke: "#e2e8f0",
+              "stroke-width": 1
+            })
+          );
+          const t = createSvgNode("text", {
+            x: left - 20,
+            y: y + 4,
+            fill: "#64748b",
+            "font-size": 11
+          });
+          t.textContent = String(tick);
+          forecastChartEl.appendChild(t);
+        }
+
+        years.forEach((year, idx) => {
+          const x = xPos(idx);
+          const t = createSvgNode("text", {
+            x: x - 14,
+            y: top + plotH + 18,
+            fill: "#475569",
+            "font-size": 11
+          });
+          t.textContent = String(year);
+          forecastChartEl.appendChild(t);
+        });
+
+        const series = [{ key: "overall_index", color: "#2563eb" }];
+        if (selectedKey !== "overall_index") {
+          series.push({ key: selectedKey, color: selectedMeta.color });
+        }
+
+        series.forEach((item) => {
+          const pointStr = points
+            .map((p, idx) => `${xPos(idx)},${yPos(Number(p[item.key] || 3))}`)
+            .join(" ");
+          forecastChartEl.appendChild(
+            createSvgNode("polyline", {
+              points: pointStr,
+              fill: "none",
+              stroke: item.color,
+              "stroke-width": 2.5,
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round"
+            })
+          );
+        });
+      }
+
+      function renderProfileDeepDive(profile) {
+        if (!profile || typeof profile !== "object") {
+          renderTagList(deepPsychTagsEl, []);
+          renderTagList(personalityTagsEl, []);
+          renderList(constitutionAdviceEl, [], "暂无数据");
+          renderList(subjectStrengthsEl, [], "暂无数据");
+          renderList(potentialDirectionsEl, [], "暂无数据");
+          renderList(parentingGuidanceEl, [], "暂无数据");
+          renderList(handsOnStrengthsEl, [], "暂无数据");
+          renderList(handsOnRisksEl, [], "暂无数据");
+          renderList(handsOnAdviceEl, [], "暂无数据");
+          emotionStyleEl.textContent = "暂无数据";
+          renderList(emotionRisksEl, [], "暂无数据");
+          renderList(emotionAdviceEl, [], "暂无数据");
+          return;
+        }
+        renderTagList(deepPsychTagsEl, profile.deep_psychology_labels || []);
+        renderTagList(personalityTagsEl, profile.personality_tags || []);
+        renderList(constitutionAdviceEl, profile.health_constitution_advice || [], "暂无数据");
+        renderList(subjectStrengthsEl, profile.subject_strengths || [], "暂无数据");
+        renderList(potentialDirectionsEl, profile.potential_development_directions || [], "暂无数据");
+        renderList(parentingGuidanceEl, profile.parenting_guidance || [], "暂无数据");
+        const hs = profile.hands_on_and_self_discipline || {};
+        renderList(handsOnStrengthsEl, hs.strengths || [], "暂无数据");
+        renderList(handsOnRisksEl, hs.risks || [], "暂无数据");
+        renderList(handsOnAdviceEl, hs.advice || [], "暂无数据");
+        const ef = profile.emotion_and_friendship || {};
+        emotionStyleEl.textContent = ef.style || "暂无数据";
+        renderList(emotionRisksEl, ef.risks || [], "暂无数据");
+        renderList(emotionAdviceEl, ef.advice || [], "暂无数据");
+      }
+
+      function buildForecastRowsMarkdown(points) {
+        if (!Array.isArray(points) || points.length === 0) {
+          return ["暂无流年预测数据。"];
+        }
+        const lines = [
+          "| 年份 | 综合走势 | 学习专注 | 情绪稳定 | 社交适应 | 自律 | 动手行动 | 体质状态 |",
+          "| --- | --- | --- | --- | --- | --- | --- | --- |"
+        ];
+        points.forEach((p) => {
+          lines.push(
+            `| ${p.year ?? "-"} | ${p.overall_index ?? "-"} | ${p.learning_focus_index ?? "-"} | ${p.emotion_stability_index ?? "-"} | ${p.social_adaptability_index ?? "-"} | ${p.self_discipline_index ?? "-"} | ${p.hands_on_action_index ?? "-"} | ${p.health_constitution_index ?? "-"} |`
+          );
+        });
+        return lines;
+      }
+
+      function buildAnnualReportMarkdown(data) {
+        const observation = data.mental_health_observation || {};
+        const profile = data.profile || {};
+        const growth = data.growth_curve || {};
+        const detailed = data.detailed_report || {};
+        const reportParts = [];
+        const now = new Date();
+        const currentDim = curveDimensionMeta[curveDimensionSelectEl.value] || curveDimensionMeta.self_discipline_index;
+
+        reportParts.push("# 流年成长报告");
+        reportParts.push(`导出时间：${now.toLocaleString()}`);
+        reportParts.push("");
+        reportParts.push("## 评估摘要");
+        reportParts.push(`- 五行类型：${profile.element_label_zh || "-"}`);
+        reportParts.push(`- 风险等级：${observation.risk_tier || "-"}`);
+        reportParts.push(`- 心理健康观察分：${observation.mental_wellbeing_score ?? "-"}`);
+        reportParts.push(`- 当前图表维度：${currentDim.label}`);
+        const birthBazi = (data.meta || {}).birth_bazi || {};
+        if (birthBazi.hour_used) {
+          const shichen = birthBazi.shichen || {};
+          const pillars = birthBazi.pillars || {};
+          reportParts.push(`- 出生小时换算时辰：${shichen.name || "-"}（${shichen.time_range || "-"}）`);
+          reportParts.push(`- 八字四柱：年 ${pillars.year || "-"} / 月 ${pillars.month || "-"} / 日 ${pillars.day || "-"} / 时 ${pillars.time || "-"}`);
+        }
+        reportParts.push("");
+        reportParts.push("## 深度心理画像");
+        reportParts.push(`- 深度心理学标签：${(profile.deep_psychology_labels || []).join("、") || "-"}`);
+        reportParts.push(`- 性格标签：${(profile.personality_tags || []).join("、") || "-"}`);
+        reportParts.push(`- 学科优势：${(profile.subject_strengths || []).join("、") || "-"}`);
+        reportParts.push(`- 潜力发展方向：${(profile.potential_development_directions || []).join("、") || "-"}`);
+        reportParts.push(`- 家长养育建议：${(profile.parenting_guidance || []).join("、") || "-"}`);
+        reportParts.push("");
+        reportParts.push("## 健康体质建议");
+        (profile.health_constitution_advice || []).forEach((item) => reportParts.push(`- ${item}`));
+        if (!Array.isArray(profile.health_constitution_advice) || profile.health_constitution_advice.length === 0) {
+          reportParts.push("- 暂无");
+        }
+        reportParts.push("");
+        reportParts.push("## 动手与自律");
+        const hs = profile.hands_on_and_self_discipline || {};
+        reportParts.push(`- 优势：${(hs.strengths || []).join("、") || "-"}`);
+        reportParts.push(`- 风险：${(hs.risks || []).join("、") || "-"}`);
+        reportParts.push(`- 建议：${(hs.advice || []).join("、") || "-"}`);
+        reportParts.push("");
+        reportParts.push("## 情绪与交友");
+        const ef = profile.emotion_and_friendship || {};
+        reportParts.push(`- 风格：${ef.style || "-"}`);
+        reportParts.push(`- 风险：${(ef.risks || []).join("、") || "-"}`);
+        reportParts.push(`- 建议：${(ef.advice || []).join("、") || "-"}`);
+        reportParts.push("");
+        reportParts.push("## 关键发现");
+        (detailed.key_findings || []).forEach((item) => reportParts.push(`- ${item}`));
+        if (!Array.isArray(detailed.key_findings) || detailed.key_findings.length === 0) {
+          reportParts.push("- 暂无");
+        }
+        reportParts.push("");
+        reportParts.push("## 流年预测曲线数据（2026-2031）");
+        buildForecastRowsMarkdown(growth.forecast_curve || []).forEach((line) => reportParts.push(line));
+        reportParts.push("");
+        reportParts.push("## 建议行动");
+        (data.recommended_actions || []).forEach((item) => reportParts.push(`- ${item}`));
+        if (!Array.isArray(data.recommended_actions) || data.recommended_actions.length === 0) {
+          reportParts.push("- 暂无");
+        }
+        reportParts.push("");
+        reportParts.push("## 免责声明");
+        reportParts.push(data.safety_notice || "本报告仅供教育与成长参考，不构成医学诊断。");
+
+        return `${reportParts.join("\n")}\n`;
+      }
+
+      function exportAnnualReport() {
+        if (!lastAssessData) {
+          setStatus("请先完成评估，再导出流年报告。", false);
+          return;
+        }
+        const markdown = buildAnnualReportMarkdown(lastAssessData);
+        const birth = lastAssessData.meta?.birth || getPayload().birth;
+        const yyyy = String(birth.year || "unknown");
+        const mm = String(birth.month || "0").padStart(2, "0");
+        const dd = String(birth.day || "0").padStart(2, "0");
+        const datePart = new Date().toISOString().slice(0, 10);
+        const filename = `流年报告_${yyyy}${mm}${dd}_${datePart}.md`;
+        const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        setStatus(`已导出：${filename}`, true);
+      }
+
+      function renderFlags(flags) {
+        reportFlagsEl.innerHTML = "";
+        if (!Array.isArray(flags) || flags.length === 0) {
+          reportFlagsEl.innerHTML = '<span class="tag">暂无</span>';
+          return;
+        }
+        flags.forEach((flag) => {
+          const span = document.createElement("span");
+          span.className = "tag";
+          span.textContent = flag;
+          reportFlagsEl.appendChild(span);
+        });
+      }
+
+      function renderDimensionAnalysis(items) {
+        reportDimensionRowsEl.innerHTML = "";
+        if (!Array.isArray(items) || items.length === 0) {
+          reportDimensionRowsEl.innerHTML = '<tr><td colspan="4">暂无数据</td></tr>';
+          return;
+        }
+        items.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.label || item.key || "-"}</td>
+            <td>${item.value ?? "-"}</td>
+            <td>${item.level || "-"}</td>
+            <td>${item.interpretation || "-"}</td>
+          `;
+          reportDimensionRowsEl.appendChild(row);
+        });
+      }
+
+      function renderTimeline(items) {
+        reportTimelineEl.innerHTML = "";
+        if (!Array.isArray(items) || items.length === 0) {
+          reportTimelineEl.innerHTML = '<div class="timeline-item">暂无数据</div>';
+          return;
+        }
+        items.forEach((item) => {
+          const block = document.createElement("div");
+          block.className = "timeline-item";
+          const forecast = item.forecast_indices || {};
+          block.innerHTML = `
+            <div class="year">${item.year || "-"} 年</div>
+            <div class="meta">学习关注 ${item.learning_focus ?? "-"} / 身心提示 ${item.wellbeing_hint ?? "-"}</div>
+            <div class="meta">预测：综合 ${forecast.overall_index ?? "-"} / 自律 ${forecast.self_discipline_index ?? "-"} / 情绪稳定 ${forecast.emotion_stability_index ?? "-"}</div>
+            <div>状态：${item.psych_state || "暂无"}</div>
+            <div>建议：${item.family_action || "暂无"}</div>
+            <div>提醒：${item.watchout || "暂无"}</div>
+          `;
+          reportTimelineEl.appendChild(block);
+        });
+      }
+
+      function renderDetailedReport(report) {
+        if (!report || typeof report !== "object") {
+          reportOverviewEl.textContent = "当前结果未返回详细报告。";
+          renderList(reportFindingsEl, [], "暂无数据");
+          renderFlags([]);
+          renderDimensionAnalysis([]);
+          renderTimeline([]);
+          renderList(reportPlan2WeeksEl, [], "暂无数据");
+          renderList(reportPlan1to3MonthsEl, [], "暂无数据");
+          renderList(reportPlanEscalationEl, [], "暂无数据");
+          reportScriptParentEl.textContent = "暂无数据";
+          reportScriptTeacherEl.textContent = "暂无数据";
+          printBtnEl.disabled = true;
+          exportReportBtnEl.disabled = true;
+          return;
+        }
+
+        reportOverviewEl.textContent = report.overview || "暂无摘要";
+        renderList(reportFindingsEl, report.key_findings || [], "暂无关键发现");
+        renderFlags(((report.risk_snapshot || {}).flags) || []);
+        renderDimensionAnalysis(report.dimension_analysis || []);
+        renderTimeline(report.growth_timeline || []);
+        renderList(reportPlan2WeeksEl, ((report.action_plan || {}).next_2_weeks) || [], "暂无数据");
+        renderList(reportPlan1to3MonthsEl, ((report.action_plan || {}).month_1_to_3) || [], "暂无数据");
+        renderList(reportPlanEscalationEl, ((report.action_plan || {}).escalation) || [], "暂无数据");
+        reportScriptParentEl.textContent = ((report.communication_script || {}).for_parents) || "暂无数据";
+        reportScriptTeacherEl.textContent = ((report.communication_script || {}).for_teachers) || "暂无数据";
+        printBtnEl.disabled = false;
+        exportReportBtnEl.disabled = false;
+      }
+
+      function renderAssessResult(response) {
+        const data = response.data || {};
+        const observation = data.mental_health_observation || {};
+        const profile = data.profile || {};
+        const growth = data.growth_curve || {};
+        const summary = growth.summary || {};
+        const forecastSummary = growth.forecast_summary || {};
+        const peakYears = Array.isArray(summary.peak_years) ? summary.peak_years.join("、") : "-";
+        const troughYears = Array.isArray(summary.trough_years) ? summary.trough_years.join("、") : "-";
+        const forecastPeak = Array.isArray(forecastSummary.forecast_peak_years)
+          ? forecastSummary.forecast_peak_years.join("、")
+          : "-";
+        const forecastTrough = Array.isArray(forecastSummary.forecast_trough_years)
+          ? forecastSummary.forecast_trough_years.join("、")
+          : "-";
+
+        const risk = String(observation.risk_tier || "").toLowerCase();
+        riskTierEl.textContent = riskTierMap[risk] || observation.risk_tier || "-";
+        wellbeingScoreEl.textContent =
+          observation.mental_wellbeing_score === undefined ? "-" : String(observation.mental_wellbeing_score);
+        elementLabelEl.textContent = profile.element_label_zh || "-";
+        psychologySummaryEl.textContent = profile.psychology_summary || "暂无数据";
+        curveSummaryEl.textContent = `学习曲线高峰：${peakYears}；低谷：${troughYears}。流年预测高峰：${forecastPeak}；低谷：${forecastTrough}`;
+        renderForecastChart(growth.forecast_curve || [], curveDimensionSelectEl.value || "self_discipline_index");
+        renderProfileDeepDive(profile);
+        renderActions(data.recommended_actions);
+        renderDetailedReport(data.detailed_report);
+        rawOutputEl.textContent = JSON.stringify(response, null, 2);
+      }
+
+      async function postJson(url, body) {
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const payload = await resp.json();
+        if (!resp.ok) {
+          throw new Error(payload.msg || `${resp.status} ${resp.statusText}`);
+        }
+        return payload;
+      }
+
+      document.getElementById("assessBtn").addEventListener("click", async () => {
+        setStatus("正在评估，请稍候...", true);
+        try {
+          const payload = getPayload();
+          const result = await postJson("/youth_growth/v1_0/assess", payload);
+          lastAssessData = {
+            ...(result.data || {}),
+            meta: {
+              ...((result.data || {}).meta || {}),
+              birth: payload.birth
+            }
+          };
+          renderAssessResult(result);
+          setStatus("评估完成", true);
+        } catch (err) {
+          setStatus(`评估失败：${String(err)}`, false);
+        }
+      });
+
+      document.getElementById("sampleBtn").addEventListener("click", () => {
+        applySampleData();
+        setStatus("已填入示例数据", true);
+      });
+
+      document.getElementById("healthBtn").addEventListener("click", async () => {
+        setStatus("正在检测服务状态...", true);
+        try {
+          const result = await postJson("/health", {});
+          rawOutputEl.textContent = JSON.stringify(result, null, 2);
+          setStatus("服务状态正常", true);
+        } catch (err) {
+          setStatus(`服务检测失败：${String(err)}`, false);
+        }
+      });
+
+      document.getElementById("skillsBtn").addEventListener("click", async () => {
+        setStatus("正在加载技能列表...", true);
+        try {
+          const result = await postJson("/skills/v1_0/list", {});
+          rawOutputEl.textContent = JSON.stringify(result, null, 2);
+          setStatus("技能列表已加载", true);
+        } catch (err) {
+          setStatus(`技能列表加载失败：${String(err)}`, false);
+        }
+      });
+
+      curveDimensionSelectEl.addEventListener("change", () => {
+        const selectedKey = curveDimensionSelectEl.value || "self_discipline_index";
+        if (lastAssessData && lastAssessData.growth_curve) {
+          renderForecastChart(lastAssessData.growth_curve.forecast_curve || [], selectedKey);
+        } else {
+          renderForecastChart([], selectedKey);
+        }
+      });
+
+      printBtnEl.addEventListener("click", () => {
+        window.print();
+      });
+      exportReportBtnEl.addEventListener("click", exportAnnualReport);
+
+      buildMetricInputs();
+      applySampleData();
+      renderForecastChart([], curveDimensionSelectEl.value || "self_discipline_index");
+      renderProfileDeepDive(null);
+      renderDetailedReport(null);
+    </script>
+  </body>
+</html>
