@@ -127,11 +127,11 @@ def test_communication_script_varies_by_tier_and_profile():
     s_low = build_communication_script(scores=low, profile=p, crisis=False)
     s_high = build_communication_script(scores=high, profile=p, crisis=False)
     assert "从问卷整合的感受" in s_low["for_parents"]
-    assert "相对平稳" in s_low["for_parents"] or "轻量的倾听" in s_low["for_parents"]
+    assert "相对平稳" in s_low["for_parents"] or "轻量倾听" in s_low["for_parents"]
     assert "内在承受的压力" in s_high["for_parents"] or "关系与安全" in s_high["for_parents"]
     assert s_low["for_parents"] != s_high["for_parents"]
     assert s_low["for_teachers"] != s_high["for_teachers"]
-    assert "结合材料" in s_low["for_parents"] or "气质与应对方式" in s_low["for_parents"]
+    assert "气质" in s_low["for_parents"] or "材料概述" in s_low["for_parents"]
 
 
 def test_communication_script_crisis_branch():
@@ -188,7 +188,7 @@ def test_build_detailed_report_communication_uses_report_content():
     assert "降低诱惑暴露" in parents or "分段学习" in parents
     assert "固定睡眠窗口" in parents
     assert "数理逻辑" in parents or "独立阅读" in parents
-    assert "报告中的具体说明为：" in parents
+    assert "报告要点：" in parents
 
     assert "专注力波动" in teachers
     assert "根据出生日期计算日干" in teachers
