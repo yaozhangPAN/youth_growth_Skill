@@ -16,3 +16,6 @@ __pycache__/
 
 # Local docs workspace
 doc/
+
+# Local development notes (do not commit)
+DEVELOPMENT.md
