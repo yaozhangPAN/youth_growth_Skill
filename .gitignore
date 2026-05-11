@@ -13,3 +13,6 @@ __pycache__/
 
 # Editor/OS temp files
 .~*
+
+# Local docs workspace
+doc/
