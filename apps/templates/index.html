@@ -424,26 +424,6 @@
         height: 10px;
         border-radius: var(--radius-pill);
       }
-      .json-panel {
-        margin-top: 16px;
-      }
-      .json-panel summary {
-        color: var(--primary);
-        cursor: pointer;
-      }
-      pre {
-        margin: 6px 0 0;
-        background: var(--surface-tile-1);
-        color: #ffffff;
-        border-radius: var(--radius-lg);
-        padding: 16px;
-        max-height: 280px;
-        overflow: auto;
-        white-space: pre-wrap;
-        word-break: break-word;
-        font-size: 12px;
-        line-height: 1.45;
-      }
       @media (max-width: 1068px) {
         .header h1 {
           font-size: 40px;
@@ -488,8 +468,7 @@
         .global-nav,
         .sub-nav,
         .header,
-        .actions,
-        .json-panel {
+        .actions {
           display: none;
         }
         .grid {
@@ -739,11 +718,6 @@
               </div>
             </div>
           </section>
-
-          <details class="json-panel">
-            <summary>查看完整 JSON 结果</summary>
-            <pre id="rawOutput">{}</pre>
-          </details>
         </article>
       </section>
     </main>
@@ -805,7 +779,6 @@
       const emotionRisksEl = document.getElementById("emotionRisks");
       const emotionAdviceEl = document.getElementById("emotionAdvice");
       const actionsListEl = document.getElementById("actionsList");
-      const rawOutputEl = document.getElementById("rawOutput");
       const printBtnEl = document.getElementById("printBtn");
       const exportReportBtnEl = document.getElementById("exportReportBtn");
       const reportOverviewEl = document.getElementById("reportOverview");
@@ -1287,7 +1260,6 @@
         renderProfileDeepDive(profile);
         renderActions(data.recommended_actions);
         renderDetailedReport(data.detailed_report);
-        rawOutputEl.textContent = JSON.stringify(response, null, 2);
       }
 
       async function postJson(url, body) {
