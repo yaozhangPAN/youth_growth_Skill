@@ -32,6 +32,9 @@ def test_run_returns_json_with_expected_keys(skill):
     assert "mental_health_observation" in out
     assert "growth_curve" in out
     assert out["crisis_escalation"] is False
+    actions = out.get("recommended_actions") or []
+    assert isinstance(actions, list)
+    assert len(actions) >= 3
 
 
 def test_crisis_keyword_escalation(skill):

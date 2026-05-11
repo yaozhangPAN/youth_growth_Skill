@@ -119,6 +119,129 @@ def _top_concerns(dimensions: dict[str, int]) -> list[str]:
     return out
 
 
+def _top_concern_dimension_keys(dimensions: dict[str, Any], limit: int = 3) -> list[str]:
+    """Return dimension keys sorted by concern severity (same weighting as `_top_concerns`)."""
+    concern_pairs: list[tuple[str, float]] = []
+    for key, value in dimensions.items():
+        if not isinstance(value, int):
+            continue
+        if key == "sleep_quality":
+            severity = float(6 - int(value))
+        else:
+            severity = float(value)
+        concern_pairs.append((key, severity))
+    concern_pairs.sort(key=lambda x: x[1], reverse=True)
+    return [k for k, _ in concern_pairs[:limit]]
+
+
+_FLAG_ACTION_HINTS: dict[str, str] = {
+    "self_harm_concern": "问卷出现自伤相关线索：建议由监护人陪同尽快联系专业机构或医院心理服务进行评估与支持。",
+    "sdq_emotional_distress": "情绪相关条目偏突出：近期减少“道理压制”，多用倾听与情绪命名，并固定一个可期待的安抚仪式（散步、听固定音乐等）。",
+    "sdq_attention_hyperactivity": "注意力与坐不住线索偏突出：学习环境做减法，任务用 10–15 分钟短段并写清“完成标准”。",
+    "sdq_peer_relation_strain": "同伴关系条目偏突出：先稳住安全感与归属感，再讨论矛盾细节；必要时请班主任做中性协调。",
+    "sdq_conduct_regulation_risk": "冲动与对抗线索偏突出：事先约定冷却信号与复盘时间，冲突当下先保边界与人身安全。",
+    "sdq_low_prosocial_behavior": "亲社会互动偏低：安排小额“帮助他人/合作完成”的场景，并及时给具体肯定。",
+    "elevated_stress": "压力感偏高：把目标拆小并明确“今天只要完成这一件”，同时保留每周恢复性活动。",
+    "poor_sleep": "睡眠线索偏弱：优先固定起床时间，睡前减少屏幕与刺激性沟通。",
+    "social_distress": "社交支持偏弱：用两人或三人小组活动建立安全互动，再逐步扩大社交挑战。",
+    "low_mood_energy": "低落无力线索偏多：用可执行微小行动重启掌控感，并同步关注作息、运动与日照。",
+}
+
+
+def _prioritize_flags(flags: list[str]) -> list[str]:
+    ranked: list[str] = []
+    for f in _FLAG_ACTION_HINTS:
+        if f in flags:
+            ranked.append(f)
+    for f in flags:
+        if f not in ranked:
+            ranked.append(f)
+    return ranked
+
+
+def build_recommended_actions(
+    *,
+    scores: dict[str, Any],
+    profile: dict[str, Any],
+    forecast_summary: dict[str, Any],
+    questionnaire: dict[str, Any] | None,
+) -> list[str]:
+    """
+    非危机场景下的「建议行动」：结合观察分、维度、标签、五行养育与流年摘要，
+    避免仅按风险等级输出固定两句话。
+    """
+    out: list[str] = []
+    seen: set[str] = set()
+
+    def add(text: str) -> None:
+        t = str(text).strip()
+        if not t or t in seen:
+            return
+        seen.add(t)
+        out.append(t)
+
+    tier = str(scores.get("risk_tier") or "medium")
+    wellbeing = scores.get("mental_wellbeing_score")
+    try:
+        wb = float(wellbeing)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        wb = 0.0
+
+    add(
+        f"心理健康观察分约 {wb:.1f} 分，当前分层为{_risk_label(tier)}。"
+        "下列条目已结合问卷维度、提示标签、五行养育要点与流年节奏做了组合，可优先选 2–3 项落地。"
+    )
+
+    flags = [f for f in (scores.get("flags") or []) if isinstance(f, str)]
+    n_flag = 0
+    for flag in _prioritize_flags(flags):
+        hint = _FLAG_ACTION_HINTS.get(flag)
+        if hint:
+            add(hint)
+            n_flag += 1
+        if n_flag >= 2:
+            break
+
+    dims_raw = scores.get("dimensions") or {}
+    dims = {k: v for k, v in dims_raw.items() if isinstance(v, int)}
+    for key in _top_concern_dimension_keys(dims, limit=2):
+        level = _dimension_level(key, int(dims[key]))
+        if level in ("bad", "mid"):
+            add(_dimension_message(key, level))
+
+    parenting = profile.get("parenting_guidance") or []
+    if isinstance(parenting, list) and parenting:
+        idx = (int(wb) + len(flags)) % len(parenting)
+        add(str(parenting[idx]))
+
+    peaks = forecast_summary.get("forecast_peak_years") or []
+    troughs = forecast_summary.get("forecast_trough_years") or []
+    if isinstance(peaks, list) and isinstance(troughs, list) and (peaks or troughs):
+        pk = "、".join(str(int(y)) for y in peaks[:4])
+        tr = "、".join(str(int(y)) for y in troughs[:4])
+        add(
+            f"流年预测（综合走势）相对更强的年份：{pk or '—'}；更宜减负稳态的年份：{tr or '—'}，"
+            "可提前与家庭/孩子对齐节奏与期望。"
+        )
+
+    notes = str((questionnaire or {}).get("notes", "")).strip()
+    if notes:
+        snippet = notes if len(notes) <= 140 else notes[:137] + "…"
+        add(f"结合补充说明，近期沟通可围绕：{snippet}")
+
+    if tier == "high" and len(out) < 4:
+        add("建议尽快联系学校心理老师或正规心理咨询机构做进一步评估（本工具不能替代专业评估）。")
+        add("家庭优先：固定亲子对话时间、降低责备语气、保证睡眠与运动底线。")
+    elif tier == "medium" and len(out) < 4:
+        add("维持规律作息与户外活动；用「我们一起试试」替代「你应该」。")
+        add("关注同伴关系与校园适应；必要时寻求班主任协同支持。")
+    elif tier == "low" and len(out) < 4:
+        add("保持每周至少一次「无评判」的亲子聊天；记录三个成长亮点以便巩固自信。")
+        add("继续强化优势科目与兴趣出口，用成就感对冲阶段性压力。")
+
+    return out[:10]
+
+
 def _timeline_comment(year_item: dict[str, Any]) -> str:
     focus = int(year_item.get("learning_focus", 3))
     wellbeing = int(year_item.get("wellbeing_hint", 3))

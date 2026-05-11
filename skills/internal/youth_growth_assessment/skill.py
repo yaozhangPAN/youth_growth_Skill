@@ -17,7 +17,7 @@ from util.youth_growth.profile_mapper import (
     build_profile,
     resolve_element,
 )
-from util.youth_growth.report_builder import build_detailed_report
+from util.youth_growth.report_builder import build_detailed_report, build_recommended_actions
 from util.youth_growth.safety import crisis_from_questionnaire, escalation_message
 from util.youth_growth.scoring import compute_scores
 
@@ -37,26 +37,10 @@ def _load_payload(user_input: str, kwargs: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
-def _actions_for_risk(tier: str, crisis: bool) -> list[str]:
-    if crisis:
-        return [
-            escalation_message(),
-            "在此之前，请确保当事人处于安全环境（移除危险物品），并由成年人陪同联系专业机构。",
-        ]
-    if tier == "high":
-        return [
-            "建议尽快联系学校心理老师或正规心理咨询机构进行评估（本工具不能替代专业评估）。",
-            "家庭优先：固定亲子对话时间、降低责备语气、保证睡眠与运动底线。",
-            "学业：把目标拆到『每天 15 分钟可完成』的微任务，减少回避。",
-        ]
-    if tier == "medium":
-        return [
-            "维持规律作息与户外活动；用『我们一起试试』替代『你应该』。",
-            "关注同伴关系与校园适应；必要时寻求班主任协同支持。",
-        ]
+def _crisis_recommended_actions() -> list[str]:
     return [
-        "保持每周至少一次『无评判』的亲子聊天；记录三个成长亮点。",
-        "继续强化优势科目与兴趣出口，用成就感对冲压力。",
+        escalation_message(),
+        "在此之前，请确保当事人处于安全环境（移除危险物品），并由成年人陪同联系专业机构。",
     ]
 
 
@@ -91,6 +75,18 @@ class YouthGrowthAssessmentSkill(BaseSkill):
         forecast_curve = build_forecast_curve(curve)
         forecast_summary = forecast_peaks_and_troughs(forecast_curve)
 
+        qdict = questionnaire if isinstance(questionnaire, dict) else {}
+        recommended_actions: list[str] = (
+            _crisis_recommended_actions()
+            if crisis
+            else build_recommended_actions(
+                scores=scores,
+                profile=profile,
+                forecast_summary=forecast_summary,
+                questionnaire=qdict,
+            )
+        )
+
         result: dict[str, Any] = {
             "meta": {
                 "skill": self.name,
@@ -111,7 +107,7 @@ class YouthGrowthAssessmentSkill(BaseSkill):
                 "forecast_curve": forecast_curve,
                 "forecast_summary": forecast_summary,
             },
-            "recommended_actions": _actions_for_risk(scores.get("risk_tier", "medium"), crisis),
+            "recommended_actions": recommended_actions,
         }
         birth_bazi = analyze_birth_bazi(birth if isinstance(birth, dict) else None)
         if birth_bazi:
@@ -127,7 +123,6 @@ class YouthGrowthAssessmentSkill(BaseSkill):
         )
 
         if crisis:
-            result["recommended_actions"] = _actions_for_risk("high", True)
             result["growth_curve"]["note"] = "危机路径下不强调年度曲线比较，请先处理安全与支持。"
         else:
             result["growth_curve"]["note"] = (
