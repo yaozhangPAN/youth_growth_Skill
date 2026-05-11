@@ -121,11 +121,11 @@ def test_communication_script_varies_by_tier_and_profile():
     p = _sample_profile()
     s_low = build_communication_script(scores=low, profile=p, crisis=False)
     s_high = build_communication_script(scores=high, profile=p, crisis=False)
-    assert "轻松场景" in s_low["for_parents"] or "短对话" in s_low["for_parents"]
-    assert "稳住关系与安全" in s_high["for_parents"] or "少用指责" in s_high["for_parents"]
+    assert "还算稳" in s_low["for_parents"] or "氛围好" in s_low["for_parents"]
+    assert "扛得吃力" in s_high["for_parents"] or "多留一只眼睛" in s_high["for_parents"]
     assert s_low["for_parents"] != s_high["for_parents"]
     assert s_low["for_teachers"] != s_high["for_teachers"]
-    assert "同理强" in s_low["for_parents"]
+    assert "脾性" in s_low["for_parents"] or "咱家孩子" in s_low["for_parents"]
 
 
 def test_communication_script_crisis_branch():

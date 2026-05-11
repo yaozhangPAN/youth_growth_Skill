@@ -243,16 +243,129 @@ def build_recommended_actions(
 
 
 _TEACHER_FLAG_SCRIPT: dict[str, str] = {
-    "sdq_emotional_distress": "若观察到情绪波动：反馈宜具体、温和，避免在同伴面前扩大化评价。",
-    "sdq_attention_hyperactivity": "若注意力与坐不住线索明显：任务分段布置、板书步骤清晰、减少同时多重口头指令。",
-    "sdq_peer_relation_strain": "若同伴关系敏感：小组活动可做稳定配对，冲突先单独倾听再公开协调。",
-    "sdq_conduct_regulation_risk": "若冲动对抗增多：先明确课堂边界与可预期后果，再安排课后一对一复盘。",
-    "sdq_low_prosocial_behavior": "若合作与助人表现偏弱：可给承担感适中的小组角色，并及时点名具体进步。",
-    "elevated_stress": "若压力线索偏高：作业与提问可先降难度与频率，用「完成一小段」替代「一次到位」。",
-    "poor_sleep": "若涉及作息：可与家长协商作业弹性，强调连续睡眠窗口比熬夜补作业更重要。",
-    "social_distress": "若社交支持偏弱：课堂上减少随机点名施压，多给准备时间再回答。",
-    "low_mood_energy": "若低落无力线索偏多：表扬聚焦过程努力，任务目标先小后大，避免公开比较。",
+    "sdq_emotional_distress": (
+        "孩子脸上挂相时，可以先小声问一句：「是不是心里有点堵？想跟我说两句也行，不想说也行。」"
+        "当天别追着要解释，留一点空白，明天再轻轻碰话题。"
+    ),
+    "sdq_attention_hyperactivity": (
+        "布置任务时尽量一次只说一步，比如：「我们先写这三行，写完抬头看我一下。」"
+        "板书或口头指令别叠太多层，孩子不容易跟丢。"
+    ),
+    "sdq_peer_relation_strain": (
+        "小组活动尽量别让孩子落单；真有矛盾，先把他带到一边听他说完，再回班里协调，比当场评理更管用。"
+    ),
+    "sdq_conduct_regulation_risk": (
+        "冲动上来了，先把语气降下来：「我们先停一下，等会儿我单独跟你聊。」"
+        "课后再用两三分钟把规则和后果说清楚，比课上硬顶效果好。"
+    ),
+    "sdq_low_prosocial_behavior": (
+        "可以故意给一点「帮个小忙」的机会，比如发本子、整理小组材料，并及时说清他帮到了谁——被需要的感觉，会慢慢养出来。"
+    ),
+    "elevated_stress": (
+        "提问和作业量可以松一档，多给「做完这一小段就歇口气」的盼头，孩子不容易绷断。"
+    ),
+    "poor_sleep": (
+        "跟家长聊的时候，不妨顺口提一句：先把起床时间稳住，比熬夜补作业更要紧；作业可以商量着挪一点，别让孩子一个人扛。"
+    ),
+    "social_distress": (
+        "课堂上少突然点名让他站起来答；想提问时，先眼神对一下、再给几秒，他会踏实很多。"
+    ),
+    "low_mood_energy": (
+        "表扬尽量落在具体过程上，比如「你今天这一步写得比上次整齐」；少做横向比较，孩子心里会松一点。"
+    ),
 }
+
+
+# 家长侧：把「维度标签」翻成家常关切 + 可直接说的例句（避免名词堆砌）
+_PARENT_DIM_WARM_LINES: dict[str, str] = {
+    "情绪调节困难": (
+        "最近如果孩子容易炸毛或闷着，您可以试着说：「我看出来你心里不太痛快，要不咱先歇五分钟，你想说再说。」"
+        "别急着讲道理，先把「我懂你难受」传过去。"
+    ),
+    "压力水平": (
+        "如果孩子老喊累、嫌烦，可以换成：「这周是不是安排太满了？咱一起划掉两件最不着急的。」"
+        "让孩子觉得你是来帮忙减负的，不是来加任务的。"
+    ),
+    "社交疏离": (
+        "聊学校时别只问成绩，可以问：「这周有没有跟谁玩得挺开心？」「有没有哪一刻觉得有点孤单？」"
+        "把「人」聊出来，比只盯事更贴心。"
+    ),
+    "学业压力": (
+        "与其说「你怎么又拖」，不如说：「这道题咱就拆成两步，先做第一步，做完我陪你喝口水。」"
+        "小步走完，比一次喊完更有用。"
+    ),
+    "睡眠质量": (
+        "睡前别开会训话，可以换成：「明天的事明天再想，今晚先把手机放客厅，我陪你到睡着。」"
+        "睡踏实了，脾气会好很多。"
+    ),
+    "专注困难": (
+        "您可以跟孩子约定：「咱们先试十分钟，只写这一段，写完就起来动一动。」"
+        "时间短、目标清，比坐一晚上更有效。"
+    ),
+    "低落无力": (
+        "如果孩子蔫蔫的，先别催振作，可以说：「我看你挺累的，要不要先吃点东西/出去走走？」"
+        "先把人暖起来，再谈学习。"
+    ),
+    "风险行为倾向": (
+        "冲动上来了，先把声音放低：「我们先停一下，等会儿再说。」"
+        "事后复盘用「下次可以怎么做」替代「你怎么又这样」，孩子才听得进去。"
+    ),
+    "自伤信号": (
+        "如果孩子提到伤害自己，请认真对待，别当玩笑岔开。"
+        "可以说：「谢谢你告诉我，我会陪着你，我们一起找能帮你的人。」并尽快联系专业机构。"
+    ),
+}
+
+
+def _parent_opening_warm(tier: str, wb: float) -> str:
+    if tier == "high":
+        return (
+            "最近孩子可能有点扛得吃力，您心里也急——这很正常。"
+            f"问卷上的整体感受分大概在 {wb:.0f} 分这一档，属于需要多留一只眼睛的时候。"
+            "这时候先把语气软下来、把关系稳住，比急着把道理讲全更管用。"
+        )
+    if tier == "medium":
+        return (
+            "最近不算轻松，但也远没到「天塌了」——别自己先吓自己。"
+            f"问卷整体大概在 {wb:.0f} 分上下，属于「需要上心、但不必天天盯梢」的阶段。"
+            "家常话慢慢聊，反而容易聊出真话。"
+        )
+    return (
+        "整体来看，孩子这段时间还算稳得住。"
+        f"问卷感受分大概在 {wb:.0f} 分这一档，趁氛围好的时候轻轻聊几句，帮助会更大。"
+    )
+
+
+def _parent_temperament_sentence(profile: dict[str, Any]) -> str | None:
+    """用摘要里的话轻轻带过特点，避免把标签名词硬贴脸上。"""
+    summary = str(profile.get("psychology_summary") or "").strip()
+    if not summary:
+        return None
+    first = summary.split("；")[0].strip()
+    if len(first) > 64:
+        first = first[:61] + "…"
+    return (
+        f"每个孩子脾性不一样。咱家孩子有点像这样：{first}。"
+        "您心里有这么个底，说话就不容易「顶牛」，孩子也不容易觉得被贴标签。"
+    )
+
+
+def _parent_peer_emotion_sentence(emo_style: str) -> str | None:
+    if not emo_style:
+        return None
+    return (
+        f"说到同伴和情绪，孩子可能有点「{emo_style}」。"
+        "您不用急着下结论，多问一句「当时你心里啥感觉」，比问「你为啥要这样」更不容易把天聊死。"
+    )
+
+
+def _parent_lines_for_top_labels(top_labels: list[str]) -> list[str]:
+    out: list[str] = []
+    for lab in top_labels[:2]:
+        line = _PARENT_DIM_WARM_LINES.get(lab.strip())
+        if line:
+            out.append(line)
+    return out
 
 
 def build_communication_script(
@@ -261,16 +374,18 @@ def build_communication_script(
     profile: dict[str, Any],
     crisis: bool,
 ) -> dict[str, str]:
-    """家校沟通话术：随分层、维度、标签与画像变化，避免长期固定两句。"""
+    """家校沟通话术：口语化、可照读，少用术语与名词拼接。"""
     if crisis:
         return {
             "for_parents": (
-                "请先放下对成绩与对错的追问，用短句确认陪伴与安全，例如「我在这里」「我们先保证你安全」。"
-                "避免争辩与说教，尽快联系专业人员，并让孩子身边有信任的成年人陪同。"
+                "这时候最难的是大人也会慌——先深呼吸。"
+                "您可以轻轻说一句：「我在这儿，我们先保证你安全。」先别追问成绩对错，也别当场讲大道理。"
+                "尽快联系专业人员，让孩子身边一直有信任的成年人陪着。"
             ),
             "for_teachers": (
-                "请避免在班级公开场合追问细节或施压；安排可信成人一对一陪伴，并转介学校心理老师、做好交接记录。"
-                "课堂任务暂缓高要求，以稳定与安全为最高优先。"
+                "班里先别公开追问细节，也别用排名刺激孩子。"
+                "麻烦安排一位孩子信得过的老师，单独陪着说说话；同时转给学校心理老师，简单记一下沟通过程。"
+                "这几天的课，先把量和难度松一松，稳定和安全比什么都重要。"
             ),
         }
 
@@ -285,90 +400,79 @@ def build_communication_script(
     top_labels = _top_concerns(dims)
     flags = [f for f in (scores.get("flags") or []) if isinstance(f, str)]
 
-    elem_zh = str(profile.get("element_label_zh") or "").strip()
-    tag = str(profile.get("psychology_tag") or "").strip()
-    summary = str(profile.get("psychology_summary") or "").strip()
-    if len(summary) > 72:
-        summary = summary[:69] + "…"
+    emo_style = str((profile.get("emotion_and_friendship") or {}).get("style") or "").strip()
 
-    ef = profile.get("emotion_and_friendship") or {}
-    emo_style = str(ef.get("style") or "").strip()
+    # —— 家长：像微信里跟闺蜜支招那样写 ——
+    parent_parts: list[str] = [_parent_opening_warm(tier, wb)]
 
-    # —— 家长话术 ——
-    parent_bits: list[str] = []
-    if tier == "high":
-        parent_bits.append(
-            f"当前心理健康观察分约 {wb:.1f} 分（{_risk_label(tier)}），建议先稳住关系与安全，"
-            "少用指责式连环提问，把「发生了什么」放在「你为什么不」之前。"
-        )
-    elif tier == "medium":
-        parent_bits.append(
-            f"当前心理健康观察分约 {wb:.1f} 分（{_risk_label(tier)}），"
-            "可用「我听到……」开头复述感受，再邀请孩子一起想一个当天能完成的小办法。"
-        )
-    else:
-        parent_bits.append(
-            f"当前心理健康观察分约 {wb:.1f} 分（{_risk_label(tier)}），"
-            "适合在散步、吃饭等轻松场景做短对话，先肯定过程努力，再轻量谈改进。"
-        )
+    temp_line = _parent_temperament_sentence(profile)
+    if temp_line:
+        parent_parts.append(temp_line)
 
-    if top_labels:
-        joined = "、".join(top_labels[:2])
-        parent_bits.append(f"谈到近况时，可先围绕「{joined}」慢一点问，避免一次追很多议题。")
+    peer_line = _parent_peer_emotion_sentence(emo_style)
+    if peer_line:
+        parent_parts.append(peer_line)
 
-    if emo_style:
-        parent_bits.append(
-            f"孩子在同伴与情绪上偏「{emo_style}」，可把目标从「立刻改正」调整为「先接住情绪，再谈下一步」。"
-        )
+    for chunk in _parent_lines_for_top_labels(top_labels):
+        parent_parts.append(chunk)
 
-    if elem_zh or tag:
-        tail = f"{elem_zh}{'：' if elem_zh and tag else ''}{tag}" if (elem_zh or tag) else ""
-        if summary:
-            parent_bits.append(f"画像参考（{tail}）——{summary}" if tail else summary)
-        elif tail:
-            parent_bits.append(f"画像参考：{tail}。")
-
-    parent_bits.append("可选用「我们一起试试」替代「你应该」，把改进拆成当天就能完成的一小步。")
+    parent_parts.append(
+        "收尾时不妨这样说：「咱不追求完美，先把今天这一小步走完。你要是愿意，我陪你一起试。」"
+        "把「你应该」换成「我们一起」，孩子心里会软很多。"
+    )
 
     if "sdq_emotional_distress" in flags or "low_mood_energy" in flags:
-        parent_bits.append("若孩子沉默或顶撞，先命名情绪再暂停十分钟，往往比当场讲道理更有效。")
+        parent_parts.append(
+            "如果孩子闷着不说话，也别硬撬。您可以递杯水、坐旁边安静待一会儿，等他开口——有时候沉默不是对抗，是在攒勇气。"
+        )
     elif "sdq_attention_hyperactivity" in flags or "poor_sleep" in flags:
-        parent_bits.append("若作息与分心突出，先把「固定起床 + 可见任务清单」立住，再谈成绩目标。")
+        parent_parts.append(
+            "如果孩子坐不住或睡不踏实，先把「固定起床 + 晚饭前一小段作业」立住，别一上来就谈大目标。"
+            "节奏稳了，情绪和注意力都会跟着好一点。"
+        )
 
-    for_parents = "".join(parent_bits)
+    for_parents = "\n\n".join(parent_parts)
 
-    # —— 老师话术 ——
-    teacher_bits: list[str] = []
+    # —— 老师：像同事间交接班那样写，短句、能照做 ——
+    teacher_parts: list[str] = []
     if tier == "high":
-        teacher_bits.append(
-            "建议以非公开方式了解近况，避免当堂追问或排名刺激；与心理老师协同并保持简要家校沟通记录。"
+        teacher_parts.append(
+            "这孩子最近可能比较脆弱，麻烦您多留意别在全班面前追问家事或成绩。"
+            "私下问一句「你还好吗、需要我帮你跟爸妈说一声吗」，比当众关心更让孩子敢开口。"
         )
     elif tier == "medium":
-        teacher_bits.append(
-            "课堂反馈可先降频、降难度，用可执行的小目标建立掌控感，再逐步提高要求。"
+        teacher_parts.append(
+            "孩子最近压力不算小，课上反馈可以松半拍。"
+            "多给「做完这一小段」的盼头，少做横向比较，他会更愿意跟着您的节奏走。"
         )
     else:
-        teacher_bits.append(
-            "可在小组合作中给承担感适中的角色，反馈多用过程性语言，点名具体进步点。"
+        teacher_parts.append(
+            "孩子整体还算稳，您平时课上多点点具体进步，他就很吃这一套。"
+            "小组里给个不大不小的角色，让他有参与感又不至于扛不住。"
         )
 
     n_tf = 0
     for flag in _prioritize_flags(flags):
         line = _TEACHER_FLAG_SCRIPT.get(flag)
         if line:
-            teacher_bits.append(line)
+            teacher_parts.append(line)
             n_tf += 1
         if n_tf >= 2:
             break
 
     if not n_tf and top_labels:
-        teacher_bits.append(
-            f"与家长沟通时可对齐优先关注：{'、'.join(top_labels[:2])}，约定一致的支持措辞与节奏。"
+        plain = "、".join(top_labels[:2])
+        teacher_parts.append(
+            f"跟家长打电话时，可以顺口对齐一下：最近家里最操心的是「{plain}」这两块。"
+            "家校用词尽量一致，孩子夹在中间才不会懵。"
         )
 
-    teacher_bits.append("评价与提问尽量避免公开比较，先给准备时间再点名，减少意外施压。")
+    teacher_parts.append(
+        "最后一句万能垫话：「我看到你在努力了，我们下次再试一点点。」"
+        "孩子听进去了，比讲一百遍道理都管用。"
+    )
 
-    for_teachers = "".join(teacher_bits)
+    for_teachers = "\n\n".join(teacher_parts)
 
     return {"for_parents": for_parents, "for_teachers": for_teachers}
 
