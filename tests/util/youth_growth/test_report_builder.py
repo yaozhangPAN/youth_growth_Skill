@@ -121,15 +121,16 @@ def test_communication_script_varies_by_tier_and_profile():
     p = _sample_profile()
     s_low = build_communication_script(scores=low, profile=p, crisis=False)
     s_high = build_communication_script(scores=high, profile=p, crisis=False)
-    assert "还算稳" in s_low["for_parents"] or "氛围好" in s_low["for_parents"]
-    assert "扛得吃力" in s_high["for_parents"] or "多留一只眼睛" in s_high["for_parents"]
+    assert "从问卷整合的感受" in s_low["for_parents"]
+    assert "相对平稳" in s_low["for_parents"] or "轻量的倾听" in s_low["for_parents"]
+    assert "内在承受的压力" in s_high["for_parents"] or "关系与安全" in s_high["for_parents"]
     assert s_low["for_parents"] != s_high["for_parents"]
     assert s_low["for_teachers"] != s_high["for_teachers"]
-    assert "脾性" in s_low["for_parents"] or "咱家孩子" in s_low["for_parents"]
+    assert "结合材料" in s_low["for_parents"] or "气质与应对方式" in s_low["for_parents"]
 
 
 def test_communication_script_crisis_branch():
     scores = compute_scores({})
     script = build_communication_script(scores=scores, profile={}, crisis=True)
-    assert "专业" in script["for_parents"] or "安全" in script["for_parents"]
+    assert "安全" in script["for_parents"] or "专业" in script["for_parents"]
     assert "心理老师" in script["for_teachers"] or "转介" in script["for_teachers"]
