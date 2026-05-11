@@ -575,6 +575,7 @@
             <div class="curve-controls">
               <label for="curveDimensionSelect">切换维度</label>
               <select id="curveDimensionSelect">
+                <option value="all_series" selected>全部曲线（综合 + 各维度）</option>
                 <option value="self_discipline_index">自律指数</option>
                 <option value="emotion_stability_index">情绪稳定指数</option>
                 <option value="social_adaptability_index">社交适应指数</option>
@@ -583,14 +584,11 @@
                 <option value="learning_focus_index">学习专注指数</option>
                 <option value="overall_index">仅看综合走势</option>
               </select>
-              <span id="curveDimensionHint" class="curve-hint">显示综合走势 + 维度曲线</span>
+              <span id="curveDimensionHint" class="curve-hint">默认：同时展示综合走势与全部维度曲线</span>
             </div>
             <div class="curve-chart">
               <svg id="forecastChart" viewBox="0 0 640 240" role="img" aria-label="流年预测曲线"></svg>
-              <div class="curve-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#0066cc"></span>综合走势</span>
-                <span class="legend-item" id="selectedDimensionLegend"><span class="legend-dot" id="selectedDimensionLegendDot" style="background:#1d1d1f"></span><span id="selectedDimensionLegendText">自律指数</span></span>
-              </div>
+              <div class="curve-legend" id="curveLegend"></div>
             </div>
           </div>
 
@@ -753,6 +751,16 @@
         learning_focus_index: { label: "学习专注指数", color: "#0071e3" }
       };
 
+      /** 与后端 forecast_curve 字段一致；全部曲线模式下按此顺序绘制（综合最后叠在最上） */
+      const FORECAST_DIMENSION_KEYS = [
+        "self_discipline_index",
+        "emotion_stability_index",
+        "social_adaptability_index",
+        "hands_on_action_index",
+        "health_constitution_index",
+        "learning_focus_index"
+      ];
+
       const metricGridEl = document.getElementById("metricGrid");
       const statusEl = document.getElementById("status");
       const riskTierEl = document.getElementById("riskTier");
@@ -763,9 +771,7 @@
       const forecastChartEl = document.getElementById("forecastChart");
       const curveDimensionSelectEl = document.getElementById("curveDimensionSelect");
       const curveDimensionHintEl = document.getElementById("curveDimensionHint");
-      const selectedDimensionLegendEl = document.getElementById("selectedDimensionLegend");
-      const selectedDimensionLegendDotEl = document.getElementById("selectedDimensionLegendDot");
-      const selectedDimensionLegendTextEl = document.getElementById("selectedDimensionLegendText");
+      const curveLegendEl = document.getElementById("curveLegend");
       const deepPsychTagsEl = document.getElementById("deepPsychTags");
       const personalityTagsEl = document.getElementById("personalityTags");
       const constitutionAdviceEl = document.getElementById("constitutionAdvice");
@@ -910,20 +916,73 @@
         return node;
       }
 
-      function renderForecastChart(points, selectedKey = "self_discipline_index") {
+      function renderCurveLegend(series) {
+        curveLegendEl.innerHTML = "";
+        series.forEach((item) => {
+          const row = document.createElement("span");
+          row.className = "legend-item";
+          const dot = document.createElement("span");
+          dot.className = "legend-dot";
+          dot.style.background = item.color;
+          const text = document.createElement("span");
+          text.textContent = item.label;
+          row.appendChild(dot);
+          row.appendChild(text);
+          curveLegendEl.appendChild(row);
+        });
+      }
+
+      function getForecastSeries(selectedKey) {
+        if (selectedKey === "all_series") {
+          const dims = FORECAST_DIMENSION_KEYS.map((key) => {
+            const meta = curveDimensionMeta[key];
+            return { key, color: meta.color, label: meta.label, strokeWidth: 2 };
+          });
+          dims.push({
+            key: "overall_index",
+            color: curveDimensionMeta.overall_index.color,
+            label: curveDimensionMeta.overall_index.label,
+            strokeWidth: 2.8
+          });
+          return dims;
+        }
+        if (selectedKey === "overall_index") {
+          return [
+            {
+              key: "overall_index",
+              color: curveDimensionMeta.overall_index.color,
+              label: curveDimensionMeta.overall_index.label,
+              strokeWidth: 2.6
+            }
+          ];
+        }
+        const meta = curveDimensionMeta[selectedKey] || curveDimensionMeta.self_discipline_index;
+        return [
+          {
+            key: "overall_index",
+            color: curveDimensionMeta.overall_index.color,
+            label: curveDimensionMeta.overall_index.label,
+            strokeWidth: 2.6
+          },
+          { key: selectedKey, color: meta.color, label: meta.label, strokeWidth: 2.5 }
+        ];
+      }
+
+      function renderForecastChart(points, selectedKey = "all_series") {
         while (forecastChartEl.firstChild) {
           forecastChartEl.removeChild(forecastChartEl.firstChild);
         }
-        const selectedMeta = curveDimensionMeta[selectedKey] || curveDimensionMeta.self_discipline_index;
-        if (selectedKey === "overall_index") {
+        if (selectedKey === "all_series") {
+          curveDimensionHintEl.textContent = "默认：同时展示综合走势与全部维度曲线";
+        } else if (selectedKey === "overall_index") {
           curveDimensionHintEl.textContent = "当前仅显示综合走势";
-          selectedDimensionLegendEl.style.display = "none";
         } else {
-          curveDimensionHintEl.textContent = "显示综合走势 + 维度曲线";
-          selectedDimensionLegendEl.style.display = "inline-flex";
-          selectedDimensionLegendTextEl.textContent = selectedMeta.label;
-          selectedDimensionLegendDotEl.style.background = selectedMeta.color;
+          curveDimensionHintEl.textContent = "显示综合走势 + 所选维度";
         }
+
+        const series = getForecastSeries(selectedKey);
+        renderCurveLegend(series);
+
         if (!Array.isArray(points) || points.length === 0) {
           const empty = createSvgNode("text", { x: 20, y: 30, fill: "#7a7a7a", "font-size": 14 });
           empty.textContent = "暂无流年曲线数据";
@@ -983,23 +1042,19 @@
           forecastChartEl.appendChild(t);
         });
 
-        const series = [{ key: "overall_index", color: "#0066cc" }];
-        if (selectedKey !== "overall_index") {
-          series.push({ key: selectedKey, color: selectedMeta.color });
-        }
-
         series.forEach((item) => {
           const pointStr = points
-            .map((p, idx) => `${xPos(idx)},${yPos(Number(p[item.key] || 3))}`)
+            .map((p, idx) => `${xPos(idx)},${yPos(Number(p[item.key] ?? 3))}`)
             .join(" ");
           forecastChartEl.appendChild(
             createSvgNode("polyline", {
               points: pointStr,
               fill: "none",
               stroke: item.color,
-              "stroke-width": 2.5,
+              "stroke-width": item.strokeWidth ?? 2.5,
               "stroke-linecap": "round",
-              "stroke-linejoin": "round"
+              "stroke-linejoin": "round",
+              opacity: selectedKey === "all_series" && item.key !== "overall_index" ? 0.92 : 1
             })
           );
         });
@@ -1060,7 +1115,11 @@
         const detailed = data.detailed_report || {};
         const reportParts = [];
         const now = new Date();
-        const currentDim = curveDimensionMeta[curveDimensionSelectEl.value] || curveDimensionMeta.self_discipline_index;
+        const dimVal = curveDimensionSelectEl.value || "all_series";
+        const currentDim =
+          dimVal === "all_series"
+            ? { label: "全部曲线（综合 + 各维度）" }
+            : curveDimensionMeta[dimVal] || curveDimensionMeta.self_discipline_index;
 
         reportParts.push("# 流年成长报告");
         reportParts.push(`导出时间：${now.toLocaleString()}`);
@@ -1256,7 +1315,7 @@
         elementLabelEl.textContent = profile.element_label_zh || "-";
         psychologySummaryEl.textContent = profile.psychology_summary || "暂无数据";
         curveSummaryEl.textContent = `学习曲线高峰：${peakYears}；低谷：${troughYears}。流年预测高峰：${forecastPeak}；低谷：${forecastTrough}`;
-        renderForecastChart(growth.forecast_curve || [], curveDimensionSelectEl.value || "self_discipline_index");
+        renderForecastChart(growth.forecast_curve || [], curveDimensionSelectEl.value || "all_series");
         renderProfileDeepDive(profile);
         renderActions(data.recommended_actions);
         renderDetailedReport(data.detailed_report);
@@ -1295,7 +1354,7 @@
       });
 
       curveDimensionSelectEl.addEventListener("change", () => {
-        const selectedKey = curveDimensionSelectEl.value || "self_discipline_index";
+        const selectedKey = curveDimensionSelectEl.value || "all_series";
         if (lastAssessData && lastAssessData.growth_curve) {
           renderForecastChart(lastAssessData.growth_curve.forecast_curve || [], selectedKey);
         } else {
@@ -1310,7 +1369,7 @@
 
       buildMetricInputs();
       applySampleData();
-      renderForecastChart([], curveDimensionSelectEl.value || "self_discipline_index");
+      renderForecastChart([], curveDimensionSelectEl.value || "all_series");
       renderProfileDeepDive(null);
       renderDetailedReport(null);
     </script>
