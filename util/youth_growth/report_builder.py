@@ -771,8 +771,14 @@ def build_detailed_report(
         ).strip(),
     }
 
+    fe_voice = profile.get("family_education_voice") if isinstance(profile, dict) else None
+    if isinstance(fe_voice, dict):
+        rv = str(fe_voice.get("reader_voice") or "").strip()
+        if rv:
+            key_findings.append(rv)
+
     return {
-        "overview": "本报告用于教育场景下的成长观察与家校沟通，不构成医学诊断。",
+        "overview": "本报告面向家庭与家校沟通，侧重因材施教式观察与行动建议，不构成医学诊断。",
         "risk_snapshot": {
             "risk_tier": tier,
             "risk_tier_label": _risk_label(tier),
@@ -809,6 +815,7 @@ def build_detailed_report(
             },
             "personalized_from_birth_structure": profile.get("personalized_from_birth_structure"),
             "learning_rhythm_hints": profile.get("learning_rhythm_hints") or [],
+            "family_education_voice": profile.get("family_education_voice"),
         },
         "dimension_analysis": dimension_analysis,
         "growth_timeline": timeline,

@@ -299,6 +299,42 @@
         line-height: 1.19;
         letter-spacing: 0.23px;
       }
+      .psychology-tag-line {
+        font-size: 14px;
+        color: var(--body-muted);
+        margin: 0 0 8px;
+        font-weight: 500;
+      }
+      .family-education-voice {
+        margin-top: 4px;
+        padding: 14px 16px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius-lg);
+        background: var(--surface-pearl);
+        font-size: 15px;
+        line-height: 1.5;
+        color: #333333;
+      }
+      .family-education-voice .fe-row {
+        margin-top: 12px;
+      }
+      .family-education-voice .fe-row:first-of-type {
+        margin-top: 0;
+      }
+      .family-education-voice .fe-k {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--body-muted);
+        margin-bottom: 4px;
+        letter-spacing: 0.02em;
+      }
+      .family-education-voice .fe-intro {
+        margin: 0 0 4px;
+        color: #444444;
+      }
+      .family-education-voice ul {
+        margin: 4px 0 0;
+      }
       ul {
         margin: 8px 0 0;
         padding-left: 20px;
@@ -568,7 +604,16 @@
 
           <div>
             <div class="block-title">心理画像摘要</div>
+            <div id="psychologyTagLine" class="psychology-tag-line" hidden></div>
             <div id="psychologySummary">暂无数据</div>
+          </div>
+
+          <div>
+            <div class="block-title">家庭教育视角</div>
+            <p style="font-size: 13px; color: var(--body-muted); margin: 0 0 8px">
+              特点 · 优势 · 成长支持（语气参考常见养育读物，便于亲子沟通；系别仍按日主天赋归类）。
+            </p>
+            <div id="familyEducationVoice" class="family-education-voice">暂无数据</div>
           </div>
 
           <div>
@@ -772,7 +817,9 @@
       const riskTierEl = document.getElementById("riskTier");
       const wellbeingScoreEl = document.getElementById("wellbeingScore");
       const elementLabelEl = document.getElementById("elementLabel");
+      const psychologyTagLineEl = document.getElementById("psychologyTagLine");
       const psychologySummaryEl = document.getElementById("psychologySummary");
+      const familyEducationVoiceEl = document.getElementById("familyEducationVoice");
       const curveSummaryEl = document.getElementById("curveSummary");
       const forecastChartEl = document.getElementById("forecastChart");
       const curveDimensionSelectEl = document.getElementById("curveDimensionSelect");
@@ -1068,6 +1115,11 @@
 
       function renderProfileDeepDive(profile) {
         if (!profile || typeof profile !== "object") {
+          if (psychologyTagLineEl) {
+            psychologyTagLineEl.setAttribute("hidden", "");
+            psychologyTagLineEl.textContent = "";
+          }
+          renderFamilyEducationVoice(null);
           renderTagList(deepPsychTagsEl, []);
           renderTagList(personalityTagsEl, []);
           renderList(constitutionAdviceEl, [], "暂无数据");
@@ -1096,6 +1148,50 @@
         emotionStyleEl.textContent = ef.style || "暂无数据";
         renderList(emotionRisksEl, ef.risks || [], "暂无数据");
         renderList(emotionAdviceEl, ef.advice || [], "暂无数据");
+      }
+
+      function renderFamilyEducationVoice(profile) {
+        if (!familyEducationVoiceEl) return;
+        familyEducationVoiceEl.innerHTML = "";
+        const fe = profile && profile.family_education_voice;
+        if (!fe || typeof fe !== "object") {
+          familyEducationVoiceEl.textContent = "暂无数据";
+          return;
+        }
+        const intro = document.createElement("p");
+        intro.className = "fe-intro";
+        intro.textContent = fe.reader_voice || "";
+        familyEducationVoiceEl.appendChild(intro);
+
+        function addRow(label, content) {
+          const row = document.createElement("div");
+          row.className = "fe-row";
+          const k = document.createElement("div");
+          k.className = "fe-k";
+          k.textContent = label;
+          row.appendChild(k);
+          const v = document.createElement("div");
+          if (typeof content === "string") {
+            v.textContent = content;
+          } else if (Array.isArray(content)) {
+            const ul = document.createElement("ul");
+            content.forEach((item) => {
+              const li = document.createElement("li");
+              li.textContent = String(item);
+              ul.appendChild(li);
+            });
+            v.appendChild(ul);
+          } else {
+            v.textContent = "-";
+          }
+          row.appendChild(v);
+          familyEducationVoiceEl.appendChild(row);
+        }
+
+        addRow("特点", fe.traits || "");
+        addRow("优势", fe.strengths || []);
+        addRow("成长支持（待加强面）", fe.growth_edges || []);
+        addRow("居家学习提示", fe.home_learning_tip || "");
       }
 
       function buildForecastRowsMarkdown(points) {
@@ -1135,6 +1231,14 @@
         reportParts.push(`- 风险等级：${observation.risk_tier || "-"}`);
         reportParts.push(`- 心理健康观察分：${observation.mental_wellbeing_score ?? "-"}`);
         reportParts.push(`- 当前图表维度：${currentDim.label}`);
+        const fe = profile.family_education_voice;
+        if (fe && typeof fe === "object") {
+          reportParts.push(`- 气质标签：${profile.psychology_tag || "-"}`);
+          reportParts.push(`- 特点（家庭教育视角）：${fe.traits || "-"}`);
+          reportParts.push(`- 优势：${(fe.strengths || []).join("；") || "-"}`);
+          reportParts.push(`- 成长支持面：${(fe.growth_edges || []).join("；") || "-"}`);
+          reportParts.push(`- 居家学习提示：${fe.home_learning_tip || "-"}`);
+        }
         const birthBazi = (data.meta || {}).birth_bazi || {};
         if (birthBazi.hour_used) {
           const shichen = birthBazi.shichen || {};
@@ -1319,10 +1423,21 @@
         wellbeingScoreEl.textContent =
           observation.mental_wellbeing_score === undefined ? "-" : String(observation.mental_wellbeing_score);
         elementLabelEl.textContent = profile.element_label_zh || "-";
+        const tag = String(profile.psychology_tag || "").trim();
+        if (psychologyTagLineEl) {
+          if (tag) {
+            psychologyTagLineEl.removeAttribute("hidden");
+            psychologyTagLineEl.textContent = tag;
+          } else {
+            psychologyTagLineEl.setAttribute("hidden", "");
+            psychologyTagLineEl.textContent = "";
+          }
+        }
         psychologySummaryEl.textContent = profile.psychology_summary || "暂无数据";
         curveSummaryEl.textContent = `学习曲线高峰：${peakYears}；低谷：${troughYears}。流年预测高峰：${forecastPeak}；低谷：${forecastTrough}`;
         renderForecastChart(growth.forecast_curve || [], curveDimensionSelectEl.value || "all_series");
         renderProfileDeepDive(profile);
+        renderFamilyEducationVoice(profile);
         renderActions(data.recommended_actions);
         renderDetailedReport(data.detailed_report);
       }

@@ -32,3 +32,14 @@ def test_resolve_uses_day_master_not_dominant():
     )
     assert el == "fire"
     assert note == "birth_bazi_with_hour"
+
+
+def test_build_profile_includes_family_education_voice():
+    from util.youth_growth.profile_mapper import build_profile
+
+    p = build_profile("wood")
+    fe = p.get("family_education_voice") or {}
+    assert fe.get("traits")
+    assert isinstance(fe.get("strengths"), list)
+    assert isinstance(fe.get("growth_edges"), list)
+    assert fe.get("home_learning_tip")
