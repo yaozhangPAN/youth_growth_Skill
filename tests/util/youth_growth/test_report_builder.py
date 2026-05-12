@@ -43,6 +43,7 @@ def test_build_recommended_actions_varies_with_questionnaire():
     assert any("心理健康观察分" in a for a in actions)
     assert any("流年预测" in a for a in actions)
     assert any("近期考试多" in a for a in actions)
+    assert any("学业" in a or "补充说明侧重学业" in a for a in actions)
 
 
 def test_build_recommended_actions_different_scores_change_opening():
@@ -180,15 +181,23 @@ def test_build_detailed_report_communication_uses_report_content():
         crisis=False,
         crisis_reasons=[],
         element_resolution="birth_day_stem",
+        questionnaire={"notes": "最近考试压力很大，睡不着"},
     )
     parents = report["communication_script"]["for_parents"]
     teachers = report["communication_script"]["for_teachers"]
 
     assert "欲望与分心感上升" in parents or "内心浮躁" in parents
     assert "降低诱惑暴露" in parents or "分段学习" in parents
-    assert "固定睡眠窗口" in parents
+    assert "学业" in parents or "睡眠" in parents or "固定睡眠" in parents
     assert "数理逻辑" in parents or "独立阅读" in parents
     assert "报告要点：" in parents
 
     assert "专注力波动" in teachers
     assert "根据出生日期计算日干" in teachers
+
+    sn = report.get("supplementary_notes_analysis") or {}
+    assert sn.get("has_notes") is True
+    assert "学业" in (sn.get("detected_themes") or []) or "作息与睡眠" in (sn.get("detected_themes") or [])
+    assert any("补充说明" in x for x in (report.get("key_findings") or []))
+    next_two = (report.get("action_plan") or {}).get("next_2_weeks") or []
+    assert any("补充说明" in str(x) for x in next_two[:3])

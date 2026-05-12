@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from util.youth_growth.notes_analysis import analyze_supplementary_notes
+
 
 _DIMENSION_META: dict[str, dict[str, Any]] = {
     "emotion_dysregulation": {
@@ -225,6 +227,9 @@ def build_recommended_actions(
         )
 
     notes = str((questionnaire or {}).get("notes", "")).strip()
+    na_actions = analyze_supplementary_notes(notes, dimensions=dims).get("extra_recommended_actions") or []
+    for line in na_actions:
+        add(line)
     if notes:
         snippet = notes if len(notes) <= 140 else notes[:137] + "…"
         add(f"结合补充说明，近期沟通可围绕：{snippet}")
@@ -310,6 +315,27 @@ def _parent_lines_for_top_labels(top_labels: list[str]) -> list[str]:
 _LEVEL_ORDER_SCRIPT: dict[str, int] = {"重点关注": 0, "需关注": 1, "稳定/保护": 2}
 
 
+def _dimension_top_for_report(
+    dimension_analysis: list[dict[str, Any]],
+    emphasis_keys: list[str],
+) -> list[dict[str, Any]]:
+    """在等级优先的前提下，将补充说明命中的、且为需关注以上的维度提前。"""
+    if not emphasis_keys:
+        return sorted(
+            dimension_analysis,
+            key=lambda x: (_LEVEL_ORDER_SCRIPT.get(str(x.get("level", "")), 9), str(x.get("key", ""))),
+        )[:3]
+    pr = {k: i for i, k in enumerate(emphasis_keys)}
+    return sorted(
+        dimension_analysis,
+        key=lambda x: (
+            _LEVEL_ORDER_SCRIPT.get(str(x.get("level", "")), 9),
+            pr.get(str(x.get("key", "")), 99),
+            str(x.get("key", "")),
+        ),
+    )[:3]
+
+
 def _parent_personal_from_report(ctx: dict[str, Any]) -> list[str]:
     """从报告摘要中抽取短句，便于口头复述。"""
     out: list[str] = []
@@ -346,6 +372,10 @@ def _parent_personal_from_report(ctx: dict[str, Any]) -> list[str]:
                 ps_short = ps if len(ps) <= 64 else ps[:61] + "…"
                 ga_short = f" 家庭侧：{ga}" if ga and len(ga) <= 40 else (f" 家庭侧：{ga[:37]}…" if ga else "")
                 out.append(f"{y}年前后：{ps_short}{ga_short}")
+
+    adj = str(ctx.get("notes_adjustment") or "").strip()
+    if adj:
+        out.append(adj)
 
     act = str(ctx.get("action_next_2_weeks") or "").strip()
     subs = ctx.get("subject_strengths")
@@ -573,6 +603,7 @@ def build_detailed_report(
     crisis: bool,
     crisis_reasons: list[str],
     element_resolution: str,
+    questionnaire: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     dims = scores.get("dimensions", {}) if isinstance(scores, dict) else {}
     tier = str(scores.get("risk_tier", "medium"))
@@ -630,6 +661,15 @@ def build_detailed_report(
     if crisis:
         key_findings.insert(0, "检测到潜在危机信号，需优先执行安全支持与专业转介。")
 
+    notes_raw = ""
+    if questionnaire and isinstance(questionnaire, dict):
+        notes_raw = str(questionnaire.get("notes") or "").strip()
+    dims_int = {k: int(v) for k, v in dims.items() if isinstance(v, int)}
+    na = analyze_supplementary_notes(notes_raw, dimensions=dims_int)
+    adj_summary = str(na.get("adjustment_summary") or "").strip()
+    if adj_summary:
+        key_findings.insert(1, adj_summary)
+
     timeline = []
     for row in curve:
         year = row.get("year")
@@ -668,11 +708,14 @@ def build_detailed_report(
             "第一时间联系监护人、学校心理老师或当地专业机构。",
             "暂停以成绩为中心的沟通，优先稳定安全与情绪。",
         ]
+    elif na.get("action_injections"):
+        inject = list(na["action_injections"])[:2]
+        action_plan["next_2_weeks"] = inject + action_plan["next_2_weeks"]
 
-    dimension_top = sorted(
+    dimension_top = _dimension_top_for_report(
         dimension_analysis,
-        key=lambda x: (_LEVEL_ORDER_SCRIPT.get(str(x.get("level", "")), 9),),
-    )[:3]
+        list(na.get("emphasis_dimension_keys") or []),
+    )
 
     timeline_snippets: list[dict[str, Any]] = []
     for row in curve[:2]:
@@ -704,6 +747,7 @@ def build_detailed_report(
         "subject_strengths": strength_slice,
         "element_resolution_note": resolution_text,
         "crisis_reasons": list(crisis_reasons) if crisis_reasons else [],
+        "notes_adjustment": adj_summary,
     }
 
     return {
@@ -717,6 +761,13 @@ def build_detailed_report(
             "crisis_reasons": crisis_reasons,
         },
         "key_findings": key_findings,
+        "supplementary_notes_analysis": {
+            "has_notes": bool(na.get("has_notes")),
+            "snippet": na.get("snippet", ""),
+            "detected_themes": na.get("detected_themes", []),
+            "theme_ids": na.get("theme_ids", []),
+            "adjustment_summary": adj_summary,
+        },
         "profile_interpretation": {
             "element_label": profile.get("element_label_zh", ""),
             "psychology_tag": profile.get("psychology_tag", ""),
@@ -730,6 +781,11 @@ def build_detailed_report(
             "hands_on_and_self_discipline": profile.get("hands_on_and_self_discipline", {}),
             "emotion_and_friendship": profile.get("emotion_and_friendship", {}),
             "element_resolution": resolution_text,
+            "supplementary_notes_insights": {
+                "themes": na.get("detected_themes", []),
+                "theme_ids": na.get("theme_ids", []),
+                "snippet": na.get("snippet", ""),
+            },
         },
         "dimension_analysis": dimension_analysis,
         "growth_timeline": timeline,

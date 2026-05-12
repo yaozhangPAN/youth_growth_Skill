@@ -120,6 +120,7 @@ class YouthGrowthAssessmentSkill(BaseSkill):
             crisis=crisis,
             crisis_reasons=crisis_reasons,
             element_resolution=resolution,
+            questionnaire=qdict,
         )
 
         if crisis:
