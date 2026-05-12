@@ -655,7 +655,7 @@ def build_detailed_report(
                 forecast_trough_years.append(year)
     resolution_text = {
         "explicit_override": "使用了显式指定的五行类型",
-        "birth_bazi_with_hour": "根据出生小时换算时辰，按完整八字四柱计算五行倾向",
+        "birth_bazi_with_hour": "根据出生小时（北京时间）换算时辰；曲线与画像按日主（日干）五行归类，盘面分数见 birth_bazi",
         "birth_day_stem": "根据出生日期计算日干后映射五行",
         "questionnaire_affinities": "根据兴趣倾向问卷推断",
         "questionnaire_default": "使用默认问卷推断",

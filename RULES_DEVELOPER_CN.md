@@ -151,12 +151,14 @@
 - `wood` <- `affinity_nature_humanities`
 - `fire` <- `affinity_expression_performance`
 
-### 8.2 出生日期日干计算（真实历法）
+### 8.2 出生日期日主五行（真实历法）
 
-函数：`infer_element_from_birth(year, month, day)`
+函数：`infer_element_from_birth(year, month, day, hour=None)`
 
-- 使用库：`lunar-python`
-- 路径：`Solar.fromYmd(y, m, d).getLunar().getDayGan()`
+- 使用库：`lunar-python`（公历入参；可选 `hour` 0–23 为北京时间，用于排四柱）。
+- **曲线与画像的 `element_key` 始终取日主（日干）五行**，与 `analyze_birth_bazi` 中的 `day_master_element` 一致。
+- `analyze_birth_bazi` 里的 `dominant_element_from_bazi` 为盘面五行分数参考，用于 meta/个性化分析，**不用于**选金木水火土话术套系。
+- 仅有年月日时：`Solar.fromYmd(y, m, d).getLunar().getDayGan()` 取日干。
 - 日干映射五行：
   - 甲/乙 -> 木
   - 丙/丁 -> 火
@@ -164,7 +166,7 @@
   - 庚/辛 -> 金
   - 壬/癸 -> 水
 
-说明：这是按日干取五行（日主）的真实历法计算，不再使用占位哈希。
+说明：不再使用占位哈希；分钟未单独建模时由整点 `hour` 入盘（与 `Solar.fromYmdHms(..., 0, 0)` 一致）。
 
 ## 9. 画像与曲线生成
 

@@ -347,6 +347,7 @@ def analyze_birth_bazi(birth: dict[str, Any] | None) -> dict[str, Any] | None:
         day_element = DAY_GAN_TO_ELEMENT.get(gan["day"], "earth")
         max_score = max(scores.values()) if scores else 0.0
         candidates = [k for k, v in scores.items() if v == max_score]
+        # 盘面五行分数最高项（用于个性化分析），不等于「日主」；日主始终以日干为准。
         dominant = day_element if day_element in candidates else candidates[0]
         return {
             "calendar": "solar",
@@ -393,15 +394,22 @@ def infer_element_from_questionnaire(q: dict[str, Any]) -> str:
 
 def infer_element_from_birth(year: int, month: int, day: int, hour: int | None = None) -> str:
     """
-    使用真实历法：按公历生日计算「日干」，并映射到五行（日主）。
-    映射关系：甲乙木、丙丁火、戊己土、庚辛金、壬癸水。
+    使用真实历法：按公历取四柱（有 hour 则用北京时间整点入盘），以「日干」映射五行（日主），
+    作为曲线与画像条目的 element_key。映射：甲乙木、丙丁火、戊己土、庚辛金、壬癸水。
+
+    说明：`analyze_birth_bazi` 中的 `dominant_element_from_bazi` 为盘面加权参考，不用于此处选类。
     """
+    birth: dict[str, Any] = {"year": year, "month": month, "day": day}
     if hour is not None:
-        analysis = analyze_birth_bazi({"year": year, "month": month, "day": day, "hour": hour})
-        if analysis and analysis.get("hour_used"):
-            return str(analysis.get("dominant_element_from_bazi", "earth"))
-    day_gan = Solar.fromYmd(year, month, day).getLunar().getDayGan()
-    return DAY_GAN_TO_ELEMENT.get(day_gan, "earth")
+        birth["hour"] = hour
+    analysis = analyze_birth_bazi(birth)
+    if analysis and analysis.get("day_master_element"):
+        return str(analysis["day_master_element"])
+    try:
+        day_gan = Solar.fromYmd(year, month, day).getLunar().getDayGan()
+        return DAY_GAN_TO_ELEMENT.get(day_gan, "earth")
+    except Exception:
+        return "earth"
 
 
 def resolve_element(
