@@ -88,7 +88,7 @@ def test_build_recommended_actions_different_scores_change_opening():
 
 def _sample_profile() -> dict:
     return {
-        "element_label_zh": "水系（壬/癸）",
+        "element_label_zh": "水系宝宝",
         "psychology_tag": "高内耗型智者 / 隐秘的胜负欲",
         "psychology_summary": "思维敏捷、内省深；压力下易思虑过度，需安全感与节奏管理。",
         "emotion_and_friendship": {"style": "同理强、压力下易退缩"},

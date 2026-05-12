@@ -1,6 +1,6 @@
 ---
 name: youth_growth_assessment
-description: 青少年心理状态观察、五行倾向画像与 2026–2031 成长曲线教育建议（非医疗诊断）
+description: 青少年心理状态观察、天赋画像与 2026–2031 成长曲线教育建议（非医疗诊断）
 version: 1.0.0
 ---
 

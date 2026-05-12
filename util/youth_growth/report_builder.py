@@ -191,7 +191,7 @@ def build_recommended_actions(
 
     add(
         f"心理健康观察分约 {wb:.1f} 分，当前分层为{_risk_label(tier)}。"
-        "下列条目已结合问卷维度、提示标签、五行养育要点与流年节奏做了组合，可优先选 2–3 项落地。"
+        "下列条目已结合问卷维度、提示标签、天赋养育要点与流年节奏做了组合，可优先选 2–3 项落地。"
     )
 
     flags = [f for f in (scores.get("flags") or []) if isinstance(f, str)]
@@ -455,7 +455,7 @@ def _teacher_personal_from_report(ctx: dict[str, Any]) -> list[str]:
     ern = str(ctx.get("element_resolution_note") or "").strip()
     if ern:
         ern_s = ern if len(ern) <= 44 else ern[:41] + "…"
-        out.append(f"五行依据一句话即可：{ern_s}")
+        out.append(f"系别判定一句话即可：{ern_s}")
     return out
 
 
@@ -654,9 +654,9 @@ def build_detailed_report(
             if score == min_score:
                 forecast_trough_years.append(year)
     resolution_text = {
-        "explicit_override": "使用了显式指定的五行类型",
-        "birth_bazi_with_hour": "根据出生小时（北京时间）换算时辰；曲线与画像按日主（日干）五行归类，盘面分数见 birth_bazi",
-        "birth_day_stem": "根据出生日期计算日干后映射五行",
+        "explicit_override": "使用了显式指定的天赋系别",
+        "birth_bazi_with_hour": "根据出生小时（北京时间）换算时辰；曲线与天赋画像按日主（日干）系别归类，盘面分数见 birth_bazi",
+        "birth_day_stem": "根据出生日期计算日干后映射系别",
         "questionnaire_affinities": "根据兴趣倾向问卷推断",
         "questionnaire_default": "使用默认问卷推断",
     }.get(element_resolution, element_resolution)

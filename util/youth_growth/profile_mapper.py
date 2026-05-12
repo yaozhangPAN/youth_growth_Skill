@@ -9,11 +9,11 @@ from lunar_python import Solar
 ELEMENT_KEYS = ("water", "metal", "earth", "wood", "fire")
 
 ELEMENT_LABELS_ZH: dict[str, str] = {
-    "water": "水系（壬/癸）",
-    "metal": "金系（庚/辛）",
-    "earth": "土系（戊/己）",
-    "wood": "木系（甲/乙）",
-    "fire": "火系（丙/丁）",
+    "water": "水系宝宝",
+    "metal": "金系宝宝",
+    "earth": "土系宝宝",
+    "wood": "木系宝宝",
+    "fire": "火系宝宝",
 }
 
 ELEMENT_PSYCHOLOGY: dict[str, dict[str, str]] = {

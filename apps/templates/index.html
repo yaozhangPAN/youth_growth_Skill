@@ -561,7 +561,7 @@
               <div class="v" id="wellbeingScore">-</div>
             </div>
             <div class="summary-item">
-              <div class="k">五行画像</div>
+              <div class="k">天赋画像</div>
               <div class="v" id="elementLabel">-</div>
             </div>
           </div>
@@ -599,7 +599,7 @@
           </div>
 
           <div>
-            <div class="block-title">五行深度画像</div>
+            <div class="block-title">天赋深度画像</div>
             <div class="sub-grid">
               <div class="sub-box">
                 <div class="k">深度心理学标签</div>
@@ -1131,7 +1131,7 @@
         reportParts.push(`导出时间：${now.toLocaleString()}`);
         reportParts.push("");
         reportParts.push("## 评估摘要");
-        reportParts.push(`- 五行类型：${profile.element_label_zh || "-"}`);
+        reportParts.push(`- 天赋系别：${profile.element_label_zh || "-"}`);
         reportParts.push(`- 风险等级：${observation.risk_tier || "-"}`);
         reportParts.push(`- 心理健康观察分：${observation.mental_wellbeing_score ?? "-"}`);
         reportParts.push(`- 当前图表维度：${currentDim.label}`);
