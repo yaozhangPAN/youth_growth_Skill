@@ -226,6 +226,11 @@ def build_recommended_actions(
             "可提前与家庭/孩子对齐节奏与期望。"
         )
 
+    pers_bf = profile.get("personalized_from_birth_structure") if isinstance(profile, dict) else None
+    if isinstance(pers_bf, dict):
+        for h in (pers_bf.get("parenting_hints") or [])[:1]:
+            add(str(h))
+
     notes = str((questionnaire or {}).get("notes", "")).strip()
     na_actions = analyze_supplementary_notes(notes, dimensions=dims).get("extra_recommended_actions") or []
     for line in na_actions:
@@ -376,6 +381,10 @@ def _parent_personal_from_report(ctx: dict[str, Any]) -> list[str]:
     adj = str(ctx.get("notes_adjustment") or "").strip()
     if adj:
         out.append(adj)
+
+    bopen = str(ctx.get("birth_structure_opening") or "").strip()
+    if bopen:
+        out.append(bopen)
 
     act = str(ctx.get("action_next_2_weeks") or "").strip()
     subs = ctx.get("subject_strengths")
@@ -670,6 +679,12 @@ def build_detailed_report(
     if adj_summary:
         key_findings.insert(1, adj_summary)
 
+    pers_bf = profile.get("personalized_from_birth_structure") if isinstance(profile, dict) else None
+    if isinstance(pers_bf, dict):
+        ol_bf = str(pers_bf.get("opening_line") or "").strip()
+        if ol_bf:
+            key_findings.append(ol_bf)
+
     timeline = []
     for row in curve:
         year = row.get("year")
@@ -748,6 +763,12 @@ def build_detailed_report(
         "element_resolution_note": resolution_text,
         "crisis_reasons": list(crisis_reasons) if crisis_reasons else [],
         "notes_adjustment": adj_summary,
+        "birth_structure_opening": str(
+            ((profile.get("personalized_from_birth_structure") or {}) if isinstance(profile, dict) else {}).get(
+                "opening_line"
+            )
+            or ""
+        ).strip(),
     }
 
     return {
@@ -786,6 +807,8 @@ def build_detailed_report(
                 "theme_ids": na.get("theme_ids", []),
                 "snippet": na.get("snippet", ""),
             },
+            "personalized_from_birth_structure": profile.get("personalized_from_birth_structure"),
+            "learning_rhythm_hints": profile.get("learning_rhythm_hints") or [],
         },
         "dimension_analysis": dimension_analysis,
         "growth_timeline": timeline,

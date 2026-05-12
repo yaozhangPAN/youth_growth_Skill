@@ -35,6 +35,9 @@ def test_run_returns_json_with_expected_keys(skill):
     actions = out.get("recommended_actions") or []
     assert isinstance(actions, list)
     assert len(actions) >= 3
+    prof = out.get("profile") or {}
+    assert "personalized_from_birth_structure" in prof
+    assert prof["personalized_from_birth_structure"].get("opening_line")
 
 
 def test_crisis_keyword_escalation(skill):

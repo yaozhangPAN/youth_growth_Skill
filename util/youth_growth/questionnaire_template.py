@@ -6,6 +6,10 @@ QUESTIONNAIRE_TEMPLATE: dict = {
     "version": "1.0.0",
     "instrument": "sdq_friendly_short_v1",
     "scale": "SDQ 友好短表：0=不太符合，1=有一点符合，2=非常符合",
+    "birth_fields": {
+        "note": "与问卷并列传入 payload.birth；公历年月日必填，hour 为 0–23 的北京时间（东八区本地钟点）。",
+        "hour_meaning": "用于历法四柱计算；不提供 hour 时仅用年月日三柱作结构参考，个性化会偏粗。",
+    },
     "friendly_sdq_questions": [
         {"key": "sdq_worried", "label": "我经常担心或紧张。", "domain": "情绪症状"},
         {"key": "sdq_unhappy", "label": "我最近常常不开心。", "domain": "情绪症状"},

@@ -261,16 +261,63 @@ def analyze_birth_bazi(birth: dict[str, Any] | None) -> dict[str, Any] | None:
     if hour is None:
         try:
             lunar = Solar.fromYmd(year, month, day).getLunar()
+            eight = lunar.getEightChar()
             day_gan = lunar.getDayGan()
             day_element = DAY_GAN_TO_ELEMENT.get(day_gan, "earth")
+            gan = {
+                "year": eight.getYearGan(),
+                "month": eight.getMonthGan(),
+                "day": eight.getDayGan(),
+                "time": None,
+            }
+            zhi = {
+                "year": eight.getYearZhi(),
+                "month": eight.getMonthZhi(),
+                "day": eight.getDayZhi(),
+                "time": None,
+            }
+            pillars = {
+                "year": eight.getYear(),
+                "month": eight.getMonth(),
+                "day": eight.getDay(),
+                "time": None,
+            }
+            scores = {k: 0.0 for k in ELEMENT_KEYS}
+            for g in (gan.get("year"), gan.get("month"), gan.get("day")):
+                if g:
+                    scores[DAY_GAN_TO_ELEMENT.get(str(g), "earth")] += 2.0
+            for z in (zhi.get("year"), zhi.get("month"), zhi.get("day")):
+                if z:
+                    scores[ZHI_MAIN_ELEMENT.get(str(z), "earth")] += 1.0
+            max_score = max(scores.values()) if scores else 0.0
+            candidates = [k for k, v in scores.items() if v == max_score]
+            dominant_three = day_element if day_element in candidates else candidates[0]
             return {
                 "calendar": "solar",
                 "hour_used": False,
+                "hour_assumption_note": "未提供时辰时，仅使用年月日三柱作结构参考；时辰按北京时间。",
                 "day_master_gan": day_gan,
                 "day_master_element": day_element,
+                "pillars": pillars,
+                "gan": gan,
+                "zhi": zhi,
+                "five_element_scores": scores,
+                "dominant_element_three_pillar": dominant_three,
             }
         except Exception:
-            return None
+            try:
+                lunar = Solar.fromYmd(year, month, day).getLunar()
+                day_gan = lunar.getDayGan()
+                day_element = DAY_GAN_TO_ELEMENT.get(day_gan, "earth")
+                return {
+                    "calendar": "solar",
+                    "hour_used": False,
+                    "hour_assumption_note": "未提供时辰时，仅使用日干信息；时辰按北京时间。",
+                    "day_master_gan": day_gan,
+                    "day_master_element": day_element,
+                }
+            except Exception:
+                return None
     try:
         lunar = Solar.fromYmdHms(year, month, day, hour, 0, 0).getLunar()
         eight = lunar.getEightChar()
@@ -304,6 +351,7 @@ def analyze_birth_bazi(birth: dict[str, Any] | None) -> dict[str, Any] | None:
         return {
             "calendar": "solar",
             "hour_used": True,
+            "hour_assumption_note": "时辰按北京时间换算。",
             "input_hour": hour,
             "shichen": _hour_to_shichen(hour),
             "pillars": pillars,
@@ -389,12 +437,13 @@ def resolve_element(
     return infer_element_from_questionnaire(q), "questionnaire_default"
 
 
-def build_profile(element: str) -> dict[str, Any]:
+def build_profile(element: str, *, birth_bazi: dict[str, Any] | None = None) -> dict[str, Any]:
     element = element if element in ELEMENT_KEYS else "earth"
     p = ELEMENT_PSYCHOLOGY[element]
     discipline = ELEMENT_HANDS_ON_DISCIPLINE[element]
     emotion_friendship = ELEMENT_EMOTION_FRIENDSHIP[element]
-    return {
+    base_parenting = list(ELEMENT_PARENTING_GUIDANCE[element])
+    out: dict[str, Any] = {
         "element_key": element,
         "element_label_zh": ELEMENT_LABELS_ZH[element],
         "psychology_tag": p["tag"],
@@ -404,7 +453,7 @@ def build_profile(element: str) -> dict[str, Any]:
         "personality_tags": ELEMENT_PERSONALITY_TAGS[element],
         "subject_strengths": ELEMENT_SUBJECTS[element],
         "potential_development_directions": ELEMENT_POTENTIAL_DEVELOPMENT_DIRECTIONS[element],
-        "parenting_guidance": ELEMENT_PARENTING_GUIDANCE[element],
+        "parenting_guidance": base_parenting,
         "hands_on_and_self_discipline": {
             "strengths": discipline["strengths"],
             "risks": discipline["risks"],
@@ -416,3 +465,19 @@ def build_profile(element: str) -> dict[str, Any]:
             "advice": emotion_friendship["advice"],
         },
     }
+    if birth_bazi and isinstance(birth_bazi, dict):
+        from util.youth_growth.bazi_insights import build_personalization_from_bazi
+
+        pers = build_personalization_from_bazi(birth_bazi)
+        if pers:
+            out["personalized_from_birth_structure"] = pers
+            ph = list(pers.get("parenting_hints") or [])
+            lh = list(pers.get("learning_hints") or [])
+            if ph:
+                out["parenting_guidance"] = ph[:4] + base_parenting[:4]
+            if lh:
+                out["learning_rhythm_hints"] = lh
+            ol = str(pers.get("opening_line") or "").strip()
+            if ol:
+                out["psychology_summary"] = f"{p['summary']} {ol}"
+    return out

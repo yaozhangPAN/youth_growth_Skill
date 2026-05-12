@@ -170,7 +170,9 @@
 
 ### 9.1 画像
 
-函数：`build_profile(element)`
+函数：`build_profile(element, birth_bazi=None)`
+
+可选传入 `analyze_birth_bazi(...)` 的返回值，合并教育向「出生结构」个性化字段（见 `personalized_from_birth_structure`、`learning_rhythm_hints`）。
 
 输出：
 
@@ -179,6 +181,8 @@
 - `psychology_tag`
 - `psychology_summary`
 - `subject_strengths`
+- `personalized_from_birth_structure`（有出生结构分析时）
+- `learning_rhythm_hints`（可选）
 
 ### 9.2 曲线
 

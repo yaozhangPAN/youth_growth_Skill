@@ -69,7 +69,8 @@ class YouthGrowthAssessmentSkill(BaseSkill):
             questionnaire=questionnaire if isinstance(questionnaire, dict) else None,
             element_override=eo_norm,
         )
-        profile = build_profile(element)
+        birth_bazi = analyze_birth_bazi(birth if isinstance(birth, dict) else None)
+        profile = build_profile(element, birth_bazi=birth_bazi)
         curve = get_yearly_curve(element)
         pt = peaks_and_troughs(curve)
         forecast_curve = build_forecast_curve(curve)
@@ -109,7 +110,6 @@ class YouthGrowthAssessmentSkill(BaseSkill):
             },
             "recommended_actions": recommended_actions,
         }
-        birth_bazi = analyze_birth_bazi(birth if isinstance(birth, dict) else None)
         if birth_bazi:
             result["meta"]["birth_bazi"] = birth_bazi
         result["detailed_report"] = build_detailed_report(
